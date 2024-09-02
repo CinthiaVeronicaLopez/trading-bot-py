@@ -14,7 +14,6 @@ from dotenv import load_dotenv
 load_dotenv()
 URL = "wss://open-api-swap.bingx.com/swap-market"
 CHANNEL = "https://open-api.bingx.com/openApi/user/auth/userDataStream"
-
 APIURL = os.getenv("API_URL")
 APIKEY = os.getenv("API_KEY")
 SECRETKEY = os.getenv("SECRET_KEY")
@@ -80,26 +79,52 @@ class Test:
 
 
 if __name__ == "__main__":
-    # Subscribe Market Depth Data
-    # test = Test(URL, CHANNEL)
     CHANNEL = {
         "id": "e745cd6d-d0f6-4a70-8d5a-043e4c741b40",
         "reqType": "sub",
         "dataType": "",
     }
+
+    # Subscribe Market Depth Data
+    # CHANNEL["dataType"] = "BTC-USDT@depth5@500ms"
+
     # Subscribe the Latest Trade Detail
-    # CHANNEL["dataType"] = "BTC-USDT@trade"
+    # CHANNEL["dataType"] = "BTC-USDT@trade"    
+    
     # Subscribe K-Line Data
-    # CHANNEL["dataType"] = "BTC-USDT@kline_1m"})
+    # CHANNEL["dataType"] = "BTC-USDT@kline_1m"   
+    
     # Subscribe to 24-hour price changes
-    # CHANNEL["dataType"] = "BTC-USDT@ticker"})
+    # CHANNEL["dataType"] = "BTC-USDT@ticker"
+    
     # Subscribe to latest price changes
-    # CHANNEL["dataType"] = "BTC-USDT@lastPrice"})
+    # CHANNEL["dataType"] = "BTC-USDT@lastPrice"
+    
     # Subscribe to latest mark price changes
-    # CHANNEL["dataType"] = "BTC-USDT@markPrice"
+    # CHANNEL["dataType"] = "BTC-USDT@markPrice"    
+    
     # Subscribe to the Book Ticker Streams
-    # CHANNEL["dataType"] = "BTC-USDT@bookTicker"
+    # CHANNEL["dataType"] = "BTC-USDT@bookTicker"    
 
+    # Create order
+    # order_params = {
+    #     "symbol": "BTC-USDT",
+    #     "side": "BUY",
+    #     "type": "LIMIT",
+    #     "quantity": 0.001,
+    #     "price": 50000,
+    #     "timestamp": int(time.time() * 1000),
+    #     "apiKey": APIKEY
+    # }
+    # order_params['signature'] = generate_signature(SECRET_KEY, order_params)
+    # order_message = {
+    #     "op": "order",
+    #     "args": [order_params]
+    # }
+    # CHANNEL=order_message
+    # Account balance and position update push
+    CHANNEL = {"m":"ACCOUNT_UPDATE"}
 
-    test = Test(URL, CHANNEL)
+    # Subscribe Market Depth Data    
+    test = Test(URL, CHANNEL)    
     test.start()
