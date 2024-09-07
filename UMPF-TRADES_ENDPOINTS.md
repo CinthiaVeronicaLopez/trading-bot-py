@@ -1,4 +1,36 @@
+# BingX API Docs
+# USDT-M Perp FuturesCoin-M Perp 
 # Trades Endpoints
+1. Test Order
+2. Place order
+3. Place order in demo trading
+4. Place multiple orders
+5. Close All Positions
+6. Cancel Order
+7. Cancel multiple orders
+8. Cancel All Open Orders
+9. Current All Open Orders
+10. Query pending order status
+11. Query Order details
+12. Query Margin Type
+13. Change Margin Type
+14. Query Leverage
+15. Set Leverage
+16. User's Force Orders
+17. Query Order history
+18. Modify Isolated Position Margin
+19. Query historical transaction orders
+20. Set Position Mode
+21. Query position mode
+22. Cancel an Existing Order and Send a New Orde
+23. Cancel orders in batches and place orders in batches
+24. Cancel All After
+25. Close position by position ID
+26. All Orders
+27. Position and Maintenance Margin Ratio
+28. Query historical transaction details
+29. Query Position History
+
 ### Test Order
 __HTTP Request https://open-api.bingx.com__
 
@@ -934,6 +966,231 @@ def demo():
     "orderIdList": "[1735924831603391122, 1735924833239172233]",
     "symbol": "BTC-USDT",
     "timestamp": "1702711750843"
+}
+    paramsStr = parseParam(paramsMap)
+    return send_request(method, path, paramsStr, payload)
+
+def get_sign(api_secret, payload):
+    signature = hmac.new(api_secret.encode("utf-8"), payload.encode("utf-8"), digestmod=sha256).hexdigest()
+    print("sign=" + signature)
+    return signature
+
+
+def send_request(method, path, urlpa, payload):
+    url = "%s%s?%s&signature=%s" % (APIURL, path, urlpa, get_sign(SECRETKEY, urlpa))
+    print(url)
+    headers = {
+        'X-BX-APIKEY': APIKEY,
+    }
+    response = requests.request(method, url, headers=headers, data=payload)
+    return response.text
+
+def parseParam(paramsMap):
+    sortedKeys = sorted(paramsMap)
+    paramsStr = "&".join(["%s=%s" % (x, paramsMap[x]) for x in sortedKeys])
+    if paramsStr != "": 
+     return paramsStr+"&timestamp="+str(int(time.time() * 1000))
+    else:
+     return paramsStr+"timestamp="+str(int(time.time() * 1000))
+
+
+if __name__ == '__main__':
+    print("demo:", demo())
+```
+
+
+## Cancel All Open Orders
+Cancel all orders in the current entrusted state of the current account.
+
+#### HTTP Request https://open-api.bingx.com
+1. Create API KEY
+2. Configure API KEY permissions
+3. Understanding signature authentication
+4. Run the following example code  
+5. Understand common error codes
+6. Understand rate limitations
+7. Understanding request timestamps
+8. Understand fee schedule
+
+#### request parameters
+    DELETE /openApi/swap/v2/trade/allOpenOrders
+
+#### rate limitation by UID: 5/s & rate limitation by IP in group Number: 2
+__API KEY permission:__ Perpetual Futures Trading
+Content-Type: request body (application/json) query string
+  
+Request
+```json
+{
+  "symbol": "string", // There must be a hyphen/ "-" in the trading pair symbol. eg: BTC-USDT,if you do not fill this field,will delete all type of orders
+  "timestamp": "int64", // request timestamp in milliseconds
+  "recvWindow": "int64" // Request valid time window value, Unit: milliseconds
+}
+{
+  "recvWindow": "0",
+  "symbol": "ATOM-USDT",
+  "timestamp": "1702732849363"
+}
+```
+Response
+```json
+{
+  "success": "LIST<Order>", // list of successfully canceled orders
+  "failed": "LIST<FailedOrder>" // list of failed orders
+}
+{
+  "code": 0,
+  "msg": "",
+  "data": {
+    "success": [
+      {
+        "symbol": "ATOM-USDT",
+        "orderId": 1736013373487123500,
+        "side": "SELL",
+        "positionSide": "SHORT",
+        "type": "LIMIT",
+        "origQty": "3.00",
+        "price": "13.044",
+        "executedQty": "0.00",
+        "avgPrice": "0.000",
+        "cumQuote": "0",
+        "stopPrice": "",
+        "profit": "0",
+        "commission": "0",
+        "status": "CANCELLED",
+        "time": 1702732816465,
+        "updateTime": 1702732816488,
+        "clientOrderId": "",
+        "leverage": "",
+        "takeProfit": {
+          "type": "",
+          "quantity": 0,
+          "stopPrice": 0,
+          "price": 0,
+          "workingType": ""
+        },
+        "stopLoss": {
+          "type": "",
+          "quantity": 0,
+          "stopPrice": 0,
+          "price": 0,
+          "workingType": ""
+        },
+        "advanceAttr": 0,
+        "positionID": 0,
+        "takeProfitEntrustPrice": 0,
+        "stopLossEntrustPrice": 0,
+        "orderType": "",
+        "workingType": ""
+      },
+      {
+        "symbol": "ATOM-USDT",
+        "orderId": 1736013373487123500,
+        "side": "BUY",
+        "positionSide": "SHORT",
+        "type": "LIMIT",
+        "origQty": "3.00",
+        "price": "11.292",
+        "executedQty": "0.00",
+        "avgPrice": "0.000",
+        "cumQuote": "0",
+        "stopPrice": "",
+        "profit": "0",
+        "commission": "0",
+        "status": "CANCELLED",
+        "time": 1702732816820,
+        "updateTime": 1702732816839,
+        "clientOrderId": "",
+        "leverage": "",
+        "takeProfit": {
+          "type": "",
+          "quantity": 0,
+          "stopPrice": 0,
+          "price": 0,
+          "workingType": ""
+        },
+        "stopLoss": {
+          "type": "",
+          "quantity": 0,
+          "stopPrice": 0,
+          "price": 0,
+          "workingType": ""
+        },
+        "advanceAttr": 0,
+        "positionID": 0,
+        "takeProfitEntrustPrice": 0,
+        "stopLossEntrustPrice": 0,
+        "orderType": "",
+        "workingType": ""
+      }
+    ],
+    "failed": [
+      {
+        "orderId": 111111,
+        "clientOrderId": "111111",
+        "errorCode": 80012,
+        "errorMessage": "cancel order failed"
+      },
+      {
+        "orderId": 222222,
+        "clientOrderId": "222222",
+        "errorCode": 80012,
+        "errorMessage": "cancel order failed"
+      }
+    ]
+  }
+}
+```
+Order
+```json
+{
+  "time": "int64", // order time, unit: millisecond
+  "symbol": "string", // trading pair, for example: BTC-USDT
+  "side": "string", // buying and selling direction
+  "type": "string", // LIMIT: Limit Order / MARKET: Market Order / STOP_MARKET: Stop Market Order / TAKE_PROFIT_MARKET: Take Profit Market Order / STOP: Stop Limit Order / TAKE_PROFIT: Take Profit Limit Order / TRIGGER_LIMIT: Stop Limit Order with Trigger / TRIGGER_MARKET: Stop Market Order with Trigger / TRAILING_STOP_MARKET: Trailing Stop Market Order
+  "positionSide": "string", // position side
+  "cumQuote": "string", // transaction amount
+  "status": "string", // order status
+  "stopPrice": "string", // Trigger price
+  "price": "string", // Price
+  "origQty": "string", // original order quantity
+  "avgPrice": "string", // average transaction price
+  "executedQty": "string", // volume
+  "orderId": "int64", // Order ID
+  "profit": "string", // profit and loss
+  "commission": "string", // Fee
+  "updateTime": "int64" // update time, unit: millisecond
+}
+```
+FailOrder
+```json
+{
+  "orderId": "int64", // Order ID
+  "clientOrderId": "string", // Customized order ID for users
+  "errorCode": "int64", // error code, 0 means successfully response, others means response failure
+  "errorMessage": "string" // Error Details Description
+}
+```
+
+### Sample code
+```python
+import time
+import requests
+import hmac
+from hashlib import sha256
+
+APIURL = "https://open-api.bingx.com"
+APIKEY = ""
+SECRETKEY = ""
+
+def demo():
+    payload = {}
+    path = '/openApi/swap/v2/trade/allOpenOrders'
+    method = "DELETE"
+    paramsMap = {
+    "recvWindow": "0",
+    "symbol": "ATOM-USDT",
+    "timestamp": "1702732849363"
 }
     paramsStr = parseParam(paramsMap)
     return send_request(method, path, paramsStr, payload)
