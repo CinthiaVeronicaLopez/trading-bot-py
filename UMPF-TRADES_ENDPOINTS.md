@@ -2093,3 +2093,115 @@ def parseParam(paramsMap):
 
 if __name__ == '__main__':
     print("demo:", demo())
+```
+
+
+## Set Leverage
+Adjust the user's opening leverage in the specified symbol contract.
+
+#### HTTP Request https://open-api.bingx.com
+1. Create API KEY
+2. Configure API KEY permissions
+3. Understanding signature authentication
+4. Run the following example code  
+5. Understand common error codes
+6. Understand rate limitations
+7. Understanding request timestamps
+8. Understand fee schedule
+
+#### request parameters
+    POST /openApi/swap/v2/trade/leverage
+
+#### rate limitation by UID: 2/s & rate limitation by IP in group Number: 2
+__API KEY permission:__ Perpetual Futures Trading
+Content-Type: request body (application/json) query string
+  
+Request
+```json
+{
+  "symbol": "string", // There must be a hyphen/ "-" in the trading pair symbol. eg: BTC-USDT
+  "side": "string", // Leverage for long or short positions. In the Hedge mode, LONG for long positions, SHORT for short positions. In the One-way mode, only supports BOTH.
+  "timestamp": "int64", // request timestamp in milliseconds
+  "leverage": "int64", // leverage
+  "recvWindow": "int64" // Request valid time window value, Unit: milliseconds
+}
+{
+  "leverage": "8",
+  "side": "SHORT",
+  "symbol": "ETH-USDT",
+  "timestamp": "1702733704941"
+}
+```
+Response
+```json
+{
+  "leverage": "int64", // leverage
+  "symbol": "string", // trading pair
+  "availableLongVol": "string", // Available Long Volume
+  "availableShortVol": "string", // Available Short Volume
+  "availableLongVal": "string", // Available Long Value
+  "availableShortVal": "string", // Available Short Value
+  "maxPositionLongVal": "string", // Maximum Position Long Value
+  "maxPositionShortVal": "string" // Maximum Position Short Value
+}
+{
+  "code": 0,
+  "msg": "",
+  "data": {
+    "leverage": 8,
+    "symbol": "ETH-USDT"
+  }
+}
+```
+
+### Sample code
+```python
+import time
+import requests
+import hmac
+from hashlib import sha256
+
+APIURL = "https://open-api.bingx.com"
+APIKEY = ""
+SECRETKEY = ""
+
+def demo():
+    payload = {}
+    path = '/openApi/swap/v2/trade/leverage'
+    method = "POST"
+    paramsMap = {
+    "leverage": "8",
+    "side": "SHORT",
+    "symbol": "ETH-USDT",
+    "timestamp": "1702733704941"
+}
+    paramsStr = parseParam(paramsMap)
+    return send_request(method, path, paramsStr, payload)
+
+def get_sign(api_secret, payload):
+    signature = hmac.new(api_secret.encode("utf-8"), payload.encode("utf-8"), digestmod=sha256).hexdigest()
+    print("sign=" + signature)
+    return signature
+
+
+def send_request(method, path, urlpa, payload):
+    url = "%s%s?%s&signature=%s" % (APIURL, path, urlpa, get_sign(SECRETKEY, urlpa))
+    print(url)
+    headers = {
+        'X-BX-APIKEY': APIKEY,
+    }
+    response = requests.request(method, url, headers=headers, data=payload)
+    return response.text
+
+def parseParam(paramsMap):
+    sortedKeys = sorted(paramsMap)
+    paramsStr = "&".join(["%s=%s" % (x, paramsMap[x]) for x in sortedKeys])
+    if paramsStr != "": 
+     return paramsStr+"&timestamp="+str(int(time.time() * 1000))
+    else:
+     return paramsStr+"timestamp="+str(int(time.time() * 1000))
+
+
+if __name__ == '__main__':
+    print("demo:", demo())
+```
