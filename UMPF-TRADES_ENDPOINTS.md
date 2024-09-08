@@ -1222,3 +1222,220 @@ def parseParam(paramsMap):
 if __name__ == '__main__':
     print("demo:", demo())
 ```
+
+
+## Current All Open Orders
+Query all orders that the user is currently entrusted with.
+
+#### HTTP Request https://open-api.bingx.com
+1. Create API KEY
+2. Configure API KEY permissions
+3. Understanding signature authentication
+4. Run the following example code  
+5. Understand common error codes
+6. Understand rate limitations
+7. Understanding request timestamps
+8. Understand fee schedule
+
+#### request parameters
+    GET /openApi/swap/v2/trade/openOrders
+
+#### rate limitation by UID: 5/s & rate limitation by IP in group Number: 
+__API KEY permission:__ Perpetual Futures Trading
+Content-Type: request body (application/json) query string
+
+Request
+```json
+{
+  "symbol": "string", // There must be a hyphen/ "-" in the trading pair symbol. eg: BTC-USDT,When not filled, query all pending orders. When filled, query the pending orders for the corresponding currency pair
+  "timestamp": "int64", // request timestamp in milliseconds
+  "recvWindow": "int64" // Request valid time window value, Unit: milliseconds
+}
+{
+  "symbol": "BTC-USDT",
+  "timestamp": "1702733126509"
+}
+```
+Response
+```json
+{
+  "time": "int64", // order time, unit: millisecond
+  "symbol": "string", // trading pair, for example: BTC-USDT
+  "side": "string", // buying and selling direction
+  "type": "string", // LIMIT: Limit Order / MARKET: Market Order / STOP_MARKET: Stop Market Order / TAKE_PROFIT_MARKET: Take Profit Market Order / STOP: Stop Limit Order / TAKE_PROFIT: Take Profit Limit Order / TRIGGER_LIMIT: Stop Limit Order with Trigger / TRIGGER_MARKET: Stop Market Order with Trigger / TRAILING_STOP_MARKET: Trailing Stop Market Order/ TRIGGER_REVERSE_MARKET:trigger reverse Market order
+  "positionSide": "string", // Position direction, required for single position as BOTH, for both long and short positions only LONG or SHORT can be chosen, defaults to LONG if empty
+  "reduceOnly": "string", // true, false; Default value is false for single position mode; This parameter is not accepted for both long and short positions mode
+  "cumQuote": "string", // transaction amount
+  "status": "string", // order status
+  "stopPrice": "string", // Trigger price
+  "price": "string", // Price
+  "origQty": "string", // original order quantity
+  "avgPrice": "string", // average transaction price
+  "executedQty": "string", // volume
+  "orderId": "int64", // Order ID
+  "profit": "string", // profit and loss
+  "commission": "string", // Fee
+  "workingType": "string", // StopPrice trigger price types: MARK_PRICE, CONTRACT_PRICE, INDEX_PRICE, default MARK_PRICE
+  "updateTime": "int64", // update time, unit: millisecond
+  "postOnly": "bool", // Maker only
+  "trailingStopRate": "float64", // Retracement rate
+  "stopGuaranteed": "string" // true: Enables the guaranteed stop-loss and take-profit feature; false: Disables the feature. The guaranteed stop-loss feature is not enabled by default. Supported order types include: STOP_MARKET: Market stop-loss order / TAKE_PROFIT_MARKET: Market take-profit order / STOP: Limit stop-loss order / TAKE_PROFIT: Limit take-profit order / TRIGGER_LIMIT: Stop-limit order with trigger / TRIGGER_MARKET: Market order with trigger for stop-loss.
+}
+{
+  "code": 0,
+  "msg": "",
+  "data": {
+    "orders": [
+      {
+        "symbol": "BTC-USDT",
+        "orderId": 1733405587011123500,
+        "side": "SELL",
+        "positionSide": "LONG",
+        "type": "LIMIT",
+        "origQty": "0.0030",
+        "price": "44459.6",
+        "executedQty": "0.0000",
+        "avgPrice": "0.0",
+        "cumQuote": "0",
+        "stopPrice": "",
+        "profit": "0.0",
+        "commission": "0.0",
+        "status": "PENDING",
+        "time": 1702256915574,
+        "updateTime": 1702256915610,
+        "clientOrderId": "",
+        "leverage": "",
+        "takeProfit": {
+          "type": "",
+          "quantity": 0,
+          "stopPrice": 0,
+          "price": 0,
+          "workingType": "",
+          "StopGuaranteed": ""
+        },
+        "stopLoss": {
+          "type": "",
+          "quantity": 0,
+          "stopPrice": 0,
+          "price": 0,
+          "workingType": "",
+          "StopGuaranteed": ""
+        },
+        "advanceAttr": 0,
+        "positionID": 0,
+        "takeProfitEntrustPrice": 0,
+        "stopLossEntrustPrice": 0,
+        "orderType": "",
+        "trailingStopRate": 0,
+        "trailingStopDistance": 0,
+        "postOnly": false,
+        "workingType": "MARK_PRICE"
+      },
+      {
+        "symbol": "BTC-USDT",
+        "orderId": 1733405587011123500,
+        "side": "SELL",
+        "positionSide": "LONG",
+        "type": "LIMIT",
+        "origQty": "0.0030",
+        "price": "44454.6",
+        "executedQty": "0.0000",
+        "avgPrice": "0.0",
+        "cumQuote": "0",
+        "stopPrice": "",
+        "profit": "0.0",
+        "commission": "0.0",
+        "status": "PENDING",
+        "time": 1702111071719,
+        "updateTime": 1702111071735,
+        "clientOrderId": "",
+        "leverage": "",
+        "takeProfit": {
+          "type": "",
+          "quantity": 0,
+          "stopPrice": 0,
+          "price": 0,
+          "workingType": "",
+          "StopGuaranteed": ""
+        },
+        "stopLoss": {
+          "type": "",
+          "quantity": 0,
+          "stopPrice": 0,
+          "price": 0,
+          "workingType": "",
+          "StopGuaranteed": ""
+        },
+        "advanceAttr": 0,
+        "positionID": 0,
+        "takeProfitEntrustPrice": 0,
+        "stopLossEntrustPrice": 0,
+        "orderType": "",
+        "trailingStopRate": 0,
+        "trailingStopDistance": 0,
+        "postOnly": false,
+        "workingType": "MARK_PRICE"
+      }
+    ]
+  }
+}
+```
+status
+```json
+{
+  "NEW": "", // New Order
+  "PARTIALLY_FILLED": "", // Partial filled
+  "FILLED": "", // all filled
+  "CANCELED": "" // canceled
+}
+```
+
+### Sample code
+```python
+import time
+import requests
+import hmac
+from hashlib import sha256
+
+APIURL = "https://open-api.bingx.com"
+APIKEY = ""
+SECRETKEY = ""
+
+def demo():
+    payload = {}
+    path = '/openApi/swap/v2/trade/openOrders'
+    method = "GET"
+    paramsMap = {
+    "symbol": "BTC-USDT",
+    "timestamp": "1702733126509"
+}
+    paramsStr = parseParam(paramsMap)
+    return send_request(method, path, paramsStr, payload)
+
+def get_sign(api_secret, payload):
+    signature = hmac.new(api_secret.encode("utf-8"), payload.encode("utf-8"), digestmod=sha256).hexdigest()
+    print("sign=" + signature)
+    return signature
+
+
+def send_request(method, path, urlpa, payload):
+    url = "%s%s?%s&signature=%s" % (APIURL, path, urlpa, get_sign(SECRETKEY, urlpa))
+    print(url)
+    headers = {
+        'X-BX-APIKEY': APIKEY,
+    }
+    response = requests.request(method, url, headers=headers, data=payload)
+    return response.text
+
+def parseParam(paramsMap):
+    sortedKeys = sorted(paramsMap)
+    paramsStr = "&".join(["%s=%s" % (x, paramsMap[x]) for x in sortedKeys])
+    if paramsStr != "": 
+     return paramsStr+"&timestamp="+str(int(time.time() * 1000))
+    else:
+     return paramsStr+"timestamp="+str(int(time.time() * 1000))
+
+
+if __name__ == '__main__':
+    print("demo:", demo())
+```
