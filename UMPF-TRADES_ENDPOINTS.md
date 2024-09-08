@@ -1878,3 +1878,110 @@ def parseParam(paramsMap):
 if __name__ == '__main__':
     print("demo:", demo())
 ```
+
+
+## Change Margin Type
+Change the user's margin mode on the specified symbol contract: isolated margin or cross margin.
+
+#### HTTP Request https://open-api.bingx.com
+1. Create API KEY
+2. Configure API KEY permissions
+3. Understanding signature authentication
+4. Run the following example code  
+5. Understand common error codes
+6. Understand rate limitations
+7. Understanding request timestamps
+8. Understand fee schedule
+
+#### request parameters
+    POST /openApi/swap/v2/trade/marginType
+
+#### rate limitation by UID: 2/s & rate limitation by IP in group Number: 2
+API KEY permission: Perpetual Futures Trading
+Content-Type: request body (application/json) query string
+
+Request
+```json
+{
+  "symbol": "string", // There must be a hyphen/ "-" in the trading pair symbol. eg: BTC-USDT
+  "timestamp": "int64", // request timestamp in milliseconds
+  "marginType": "string", // Margin mode ISOLATED (isolated margin), CROSSED (cross margin)
+  "recvWindow": "int64" // Request valid time window value, Unit: milliseconds
+}
+{
+  "symbol": "MINA-USDT",
+  "marginType": "CROSSED",
+  "recvWindow": "60000",
+  "timestamp": "1702733445917"
+}
+```
+Response
+```json
+{
+  "code": "int64", // error code, 0 means successfully response, others means response failure
+  "msg": "string" // Error Details Description
+}
+{
+  "code": 0,
+  "msg": ""
+}
+```
+marginType
+```json
+{
+  "ISOLATED": "", // Isolated Margin
+  "CROSSED": "" // Full position
+}
+```
+
+### Sample code
+```python
+import time
+import requests
+import hmac
+from hashlib import sha256
+
+APIURL = "https://open-api.bingx.com"
+APIKEY = ""
+SECRETKEY = ""
+
+def demo():
+    payload = {}
+    path = '/openApi/swap/v2/trade/marginType'
+    method = "POST"
+    paramsMap = {
+    "symbol": "MINA-USDT",
+    "marginType": "CROSSED",
+    "recvWindow": "60000",
+    "timestamp": "1702733445917"
+}
+    paramsStr = parseParam(paramsMap)
+    return send_request(method, path, paramsStr, payload)
+
+def get_sign(api_secret, payload):
+    signature = hmac.new(api_secret.encode("utf-8"), payload.encode("utf-8"), digestmod=sha256).hexdigest()
+    print("sign=" + signature)
+    return signature
+
+
+def send_request(method, path, urlpa, payload):
+    url = "%s%s?%s&signature=%s" % (APIURL, path, urlpa, get_sign(SECRETKEY, urlpa))
+    print(url)
+    headers = {
+        'X-BX-APIKEY': APIKEY,
+    }
+    response = requests.request(method, url, headers=headers, data=payload)
+    return response.text
+
+def parseParam(paramsMap):
+    sortedKeys = sorted(paramsMap)
+    paramsStr = "&".join(["%s=%s" % (x, paramsMap[x]) for x in sortedKeys])
+    if paramsStr != "": 
+     return paramsStr+"&timestamp="+str(int(time.time() * 1000))
+    else:
+     return paramsStr+"timestamp="+str(int(time.time() * 1000))
+
+
+if __name__ == '__main__':
+    print("demo:", demo())
+```
