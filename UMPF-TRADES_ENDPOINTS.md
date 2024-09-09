@@ -2977,3 +2977,241 @@ def parseParam(paramsMap):
 if __name__ == '__main__':
     print("demo:", demo())
 ```
+
+
+## Cancel an Existing Order and Send a New Order
+This interface is used to cancel an order and place a new one on the same trading pair.
+
+#### HTTP Request https://open-api.bingx.com
+
+### Interface Parameters
+  POST /openApi/swap/v1/trade/cancelReplace
+
+__rate limitation by UID: 5/s & rate limitation by IP in group Number:__ 2
+
+__API KEY permission:__ Perpetual Futures Trading
+
+Content-Type: request body (application/json) query string
+  
+Request
+```json
+{
+  "cancelReplaceMode": "string", // STOP_ON_FAILURE: If the order cancellation fails, the replacement order will not continue. ALLOW_FAILURE: Regardless of the success of the order cancellation, the replacement order will proceed.
+  "cancelClientOrderId": "string", // The original client-defined order ID to be canceled. The system will convert this field to lowercase. Either cancelClientOrderId or cancelOrderId must be provided. If both parameters are provided, cancelOrderId takes precedence.
+  "cancelOrderId": "int64", // The platform order ID to be canceled. Either cancelClientOrderId or cancelOrderId must be provided. If both parameters are provided, cancelOrderId takes precedence.
+  "cancelRestrictions": "string", // ONLY_NEW: If the order status is NEW, the cancellation will succeed. ONLY_PENDING: If the order status is PENDING, the cancellation will succeed. ONLY_PARTIALLY_FILLED: If the order status is PARTIALLY_FILLED, the cancellation will succeed.
+  "symbol": "string", // There must be a hyphen/ "-" in the trading pair symbol. eg: BTC-USDT
+  "type": "string", // LIMIT: Limit Order / MARKET: Market Order / STOP_MARKET: Stop Market Order / TAKE_PROFIT_MARKET: Take Profit Market Order / STOP: Stop Limit Order / TAKE_PROFIT: Take Profit Limit Order / TRIGGER_LIMIT: Stop Limit Order with Trigger / TRIGGER_MARKET: Stop Market Order with Trigger / TRAILING_STOP_MARKET: Trailing Stop Market Order / TRAILING_TP_SL: Trailing TakeProfit or StopLoss
+  "side": "string", // buying and selling direction SELL, BUY
+  "positionSide": "string", // Position direction, required for single position as BOTH, for both long and short positions only LONG or SHORT can be chosen, defaults to LONG if empty
+  "reduceOnly": "string", // true, false; Default value is false for single position mode; This parameter is not accepted for both long and short positions mode
+  "price": "float64", // Price, represents the trailing stop distance in TRAILING_STOP_MARKET and TRAILING_TP_SL
+  "quantity": "float64", // Original quantity, only support units by COIN ,Ordering with quantity U is not currently supported.
+  "stopPrice": "float64", // Trigger price, only required for STOP_MARKET, TAKE_PROFIT_MARKET, STOP, TAKE_PROFIT, TRIGGER_LIMIT, TRIGGER_MARKET
+  "priceRate": "float64", // For type: TRAILING_STOP_MARKET or TRAILING_TP_SL ; Maximum: 1
+  "workingType": "string", // StopPrice trigger price types: MARK_PRICE, CONTRACT_PRICE, INDEX_PRICE, default MARK_PRICE. When the type is STOP or STOP_MARKET, and stopGuaranteed is true, the workingType must only be CONTRACT_PRICE.
+  "stopLoss": "string", // Support setting stop loss while placing an order. Only supports type: STOP_MARKET/STOP
+  "takeProfit": "string", // Support setting take profit while placing an order. Only supports type: TAKE_PROFIT_MARKET/TAKE_PROFIT
+  "clientOrderId": "string", // Customized order ID for users, with a limit of characters from 1 to 40. The system will convert this field to lowercase. Different orders cannot use the same clientOrderId, clientOrderId only supports LIMIT/MARKET order type
+  "timestamp": "int64", // request timestamp, unit: millisecond
+  "recvWindow": "int64", // Request valid time window value, Unit: milliseconds
+  "closePosition": "string", // true, false; all position squaring after triggering, only support STOP_MARKET and TAKE_PROFIT_MARKET; not used with quantity; comes with only position squaring effect, not used with reduceOnly
+  "activationPrice": "float64", // Used with TRAILING_STOP_MARKET or TRAILING_TP_SL orders, default as the latest price(supporting different workingType)
+  "stopGuaranteed": "string" // true: Enables the guaranteed stop-loss and take-profit feature; false: Disables the feature. The guaranteed stop-loss feature is not enabled by default. Supported order types include: STOP_MARKET: Market stop-loss order / TAKE_PROFIT_MARKET: Market take-profit order / STOP: Limit stop-loss order / TAKE_PROFIT: Limit take-profit order / TRIGGER_LIMIT: Stop-limit order with trigger / TRIGGER_MARKET: Market order with trigger for stop-loss.
+}
+{
+  "cancelReplaceMode": "STOP_ON_FAILURE",
+  "cancelClientOrderId": "abc123test",
+  "cancelOrderId": 123456789,
+  "cancelRestrictions": "ONLY_NEWS",
+  "symbol": "BTC-USDT",
+  "side": "BUY",
+  "positionSide": "LONG",
+  "type": "MARKET",
+  "quantity": 5,
+  "takeProfit": "{\"type\": \"TAKE_PROFIT_MARKET\", \"stopPrice\": 31968.0,\"price\": 31968.0,\"workingType\":\"MARK_PRICE\"}",
+  "timestamp": "1702731530753"
+}
+```
+stopLoss/takeProfit
+```json
+{
+  "type": "string", // Only supports type: STOP_MARKET/STOP, TAKE_PROFIT_MARKET/TAKE_PROFIT
+  "stopPrice": "float64", // Trigger price, only for STOP_MARKET, TAKE_PROFIT_MARKET, STOP, TAKE_PROFIT
+  "price": "float64", // Order price
+  "workingType": "string", // Trigger price type for stopPrice: MARK_PRICE, CONTRACT_PRICE, INDEX_PRICE, default is MARK_PRICE. When the type is STOP or STOP_MARKET, and stopGuaranteed is true, the workingType must only be CONTRACT_PRICE.
+  "stopGuaranteed": "string" // true: Enables the guaranteed stop-loss and take-profit feature; false: Disables the feature. The guaranteed stop-loss feature is not enabled by default. Supported order types include: STOP_MARKET: Market stop-loss order / TAKE_PROFIT_MARKET: Market take-profit order / STOP: Limit stop-loss order / TAKE_PROFIT: Limit take-profit order / TRIGGER_LIMIT: Stop-limit order with trigger / TRIGGER_MARKET: Market order with trigger for stop-loss.
+}
+```
+Response
+```json
+{
+  "cancelResult": "string", // Cancellation result. true: Cancellation successful, false: Cancellation failed
+  "cancelMsg": "string", // Reason for the cancellation failure
+  "cancelResponse": "CancelResponse", // Information about the canceled order
+  "replaceResult": "string", // Replacement result. true: Replacement successful, false: Replacement failed
+  "replaceMsg": "string", // Reason for the replacement failure
+  "newOrderResponse": "NewOrderResponse" // Information about the new order
+}
+{
+  "code": 0,
+  "msg": "",
+  "data": {
+    "cancelResult": "true",
+    "cancelMsg": "",
+    "cancelResponse": {
+      "cancelClientOrderId": "",
+      "cancelOrderId": 123456789,
+      "symbol": "BTC-USDT",
+      "orderId": 123456789,
+      "side": "BUY",
+      "positionSide": "LONG",
+      "type": "LIMIT",
+      "origQty": "1.0000",
+      "price": "38000.0",
+      "executedQty": "0.0000",
+      "avgPrice": "0.0",
+      "cumQuote": "0",
+      "stopPrice": "",
+      "profit": "0.0000",
+      "commission": "0.000000",
+      "status": "PENDING",
+      "time": 1706858471000,
+      "updateTime": 1706858471000,
+      "clientOrderId": "",
+      "leverage": "15X",
+      "workingType": "MARK_PRICE",
+      "onlyOnePosition": false,
+      "reduceOnly": false
+    },
+    "replaceResult": "true",
+    "replaceMsg": "",
+    "newOrderResponse": {
+      "orderId": 987654321,
+      "symbol": "BTC-USDT",
+      "positionSide": "LONG",
+      "side": "BUY",
+      "type": "LIMIT",
+      "price": 38000,
+      "quantity": 1,
+      "stopPrice": 0,
+      "workingType": "MARK_PRICE",
+      "clientOrderId": "",
+      "timeInForce": "GTC",
+      "priceRate": 0,
+      "stopLoss": "{\"type\": \"STOP\", \"stopPrice\": 37000, \"price\": 37000}",
+      "takeProfit": "{\"type\": \"TAKE_PROFIT\", \"stopPrice\": 45000, \"price\": 45000}",
+      "reduceOnly": false
+    }
+  }
+}
+```
+CancelResponse
+```json
+{
+  "cancelClientOrderId": "string", // Custom OrderId of the canceled order. The system will convert this field to lowercase.
+  "cancelOrderId": "string", // OrderId of the canceled order
+  "symbol": "string", // trading pair, for example: BTC-USDT
+  "orderId": "int64", // Order ID
+  "side": "string", // buying and selling direction
+  "positionSide": "string", // Position direction, required for single position as BOTH, for both long and short positions only LONG or SHORT can be chosen, defaults to LONG if empty
+  "type": "string", // LIMIT: Limit Order / MARKET: Market Order / STOP_MARKET: Stop Market Order / TAKE_PROFIT_MARKET: Take Profit Market Order / STOP: Stop Limit Order / TAKE_PROFIT: Take Profit Limit Order / TRIGGER_LIMIT: Stop Limit Order with Trigger / TRIGGER_MARKET: Stop Market Order with Trigger / TRAILING_STOP_MARKET: Trailing Stop Market Order / TRAILING_TP_SL: Trailing TakeProfit or StopLoss
+  "origQty": "string", // original order quantity
+  "price": "string", // Price
+  "executedQty": "string", // volume
+  "avgPrice": "string", // average transaction price
+  "cumQuote": "string", // transaction amount
+  "stopPrice": "string", // Trigger price
+  "profit": "string", // profit and loss
+  "commission": "string", // Fee
+  "status": "string", // order status
+  "time": "int64", // order time, unit: millisecond
+  "updateTime": "int64", // update time, unit: millisecond
+  "clientOrderId": "string", // Customized order ID for users. The system will convert this field to lowercase.
+  "leverage": "string", // Leverage
+  "workingType": "string", // StopPrice trigger price types: MARK_PRICE, CONTRACT_PRICE, INDEX_PRICE, default MARK_PRICE. When the type is STOP or STOP_MARKET, and stopGuaranteed is true, the workingType must only be CONTRACT_PRICE.
+  "onlyOnePosition": "bool", // is OneWay Position mode, true: yes; false: no
+  "reduceOnly": "string", // true, false; Default value is false for single position mode; This parameter is not accepted for both long and short positions mode
+  "stopGuaranteed": "string" // true: Enables the guaranteed stop-loss and take-profit feature; false: Disables the feature. The guaranteed stop-loss feature is not enabled by default. Supported order types include: STOP_MARKET: Market stop-loss order / TAKE_PROFIT_MARKET: Market take-profit order / STOP: Limit stop-loss order / TAKE_PROFIT: Limit take-profit order / TRIGGER_LIMIT: Stop-limit order with trigger / TRIGGER_MARKET: Market order with trigger for stop-loss.
+}
+```
+NewOrderResponse
+```json
+{
+  "orderId": "int64", // Order ID
+  "symbol": "string", // trading pair, for example: BTC-USDT
+  "positionSide": "string", // Position direction, required for single position as BOTH, for both long and short positions only LONG or SHORT can be chosen, defaults to LONG if empty
+  "side": "string", // buying and selling direction
+  "type": "string", // LIMIT: Limit Order / MARKET: Market Order / STOP_MARKET: Stop Market Order / TAKE_PROFIT_MARKET: Take Profit Market Order / STOP: Stop Limit Order / TAKE_PROFIT: Take Profit Limit Order / TRIGGER_LIMIT: Stop Limit Order with Trigger / TRIGGER_MARKET: Stop Market Order with Trigger / TRAILING_STOP_MARKET: Trailing Stop Market Order / TRAILING_TP_SL: Trailing TakeProfit or StopLoss
+  "price": "string", // Price
+  "quantity": "float64", // original order quantity
+  "stopPrice": "string", // Trigger price
+  "workingType": "string", // StopPrice trigger price types: MARK_PRICE, CONTRACT_PRICE, INDEX_PRICE, default MARK_PRICE. When the type is STOP or STOP_MARKET, and stopGuaranteed is true, the workingType must only be CONTRACT_PRICE.
+  "clientOrderId": "string", // Customized order ID for users. The system will convert this field to lowercase.
+  "timeInForce": "string", // timeInForce
+  "priceRate": "float64", // For type: TRAILING_STOP_MARKET or TRAILING_TP_SL ; Maximum: 1
+  "reduceOnly": "string", // true, false; Default value is false for single position mode; This parameter is not accepted for both long and short positions mode
+  "stopGuaranteed": "string" // true: Enables the guaranteed stop-loss and take-profit feature; false: Disables the feature. The guaranteed stop-loss feature is not enabled by default. Supported order types include: STOP_MARKET: Market stop-loss order / TAKE_PROFIT_MARKET: Market take-profit order / STOP: Limit stop-loss order / TAKE_PROFIT: Limit take-profit order / TRIGGER_LIMIT: Stop-limit order with trigger / TRIGGER_MARKET: Market order with trigger for stop-loss.
+}
+```
+
+
+### Sample code
+```python
+
+import time
+import requests
+import hmac
+from hashlib import sha256
+
+APIURL = "https://open-api.bingx.com"
+APIKEY = ""
+SECRETKEY = ""
+
+def demo():
+    payload = {}
+    path = '/openApi/swap/v1/trade/cancelReplace'
+    method = "POST"
+    paramsMap = {
+    "cancelReplaceMode": "STOP_ON_FAILURE",
+    "cancelClientOrderId": "abc123test",
+    "cancelOrderId": 123456789,
+    "cancelRestrictions": "ONLY_NEWS",
+    "symbol": "BTC-USDT",
+    "side": "BUY",
+    "positionSide": "LONG",
+    "type": "MARKET",
+    "quantity": 5,
+    "takeProfit": "{\"type\": \"TAKE_PROFIT_MARKET\", \"stopPrice\": 31968.0,\"price\": 31968.0,\"workingType\":\"MARK_PRICE\"}",
+    "timestamp": "1702731530753"
+}
+    paramsStr = parseParam(paramsMap)
+    return send_request(method, path, paramsStr, payload)
+
+def get_sign(api_secret, payload):
+    signature = hmac.new(api_secret.encode("utf-8"), payload.encode("utf-8"), digestmod=sha256).hexdigest()
+    print("sign=" + signature)
+    return signature
+
+
+def send_request(method, path, urlpa, payload):
+    url = "%s%s?%s&signature=%s" % (APIURL, path, urlpa, get_sign(SECRETKEY, urlpa))
+    print(url)
+    headers = {
+        'X-BX-APIKEY': APIKEY,
+    }
+    response = requests.request(method, url, headers=headers, data=payload)
+    return response.text
+
+def parseParam(paramsMap):
+    sortedKeys = sorted(paramsMap)
+    paramsStr = "&".join(["%s=%s" % (x, paramsMap[x]) for x in sortedKeys])
+    if paramsStr != "": 
+     return paramsStr+"&timestamp="+str(int(time.time() * 1000))
+    else:
+     return paramsStr+"timestamp="+str(int(time.time() * 1000))
+
+
+if __name__ == '__main__':
+    print("demo:", demo())
+```
