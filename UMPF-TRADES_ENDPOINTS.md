@@ -2796,3 +2796,96 @@ def parseParam(paramsMap):
 if __name__ == '__main__':
     print("demo:", demo())
 ```
+
+
+## Set Position Mode
+Used to set the position mode of perpetual contract, supporting both dual position mode and single position mode
+
+> *The Position Mode applies to all contracts and can be set when there are no active positions or pending orders.
+
+#### HTTP Request https://open-api.bingx.com
+
+#### Interface Parameters
+    POST /openApi/swap/v1/positionSide/dual
+
+__rate limitation by UID: 2/s & rate limitation by IP in group Number:__ 2
+
+__API KEY permission:__ Perpetual Futures Trading
+
+Content-Type: request body (application/json) query string
+  
+Request
+```json
+{
+  "dualSidePosition": "true", // "true": dual position mode; "false": single position mode
+  "timestamp": "int64", // Timestamp of the request in milliseconds
+  "recvWindow": "int64" // The window time for the request to be valid, in milliseconds
+}
+{
+  "dualSidePosition": "true",
+  "timestamp": "1702731530753"
+}
+```
+Response
+```json
+{
+  "dualSidePosition": "string" // "true": dual position mode; "false": single position mode
+}
+{
+  "code": 0,
+  "msg": "",
+  "data": {
+    "dualSidePosition": "true"
+  }
+}
+```
+
+### Sample code
+```python
+import time
+import requests
+import hmac
+from hashlib import sha256
+
+APIURL = "https://open-api.bingx.com"
+APIKEY = ""
+SECRETKEY = ""
+
+def demo():
+    payload = {}
+    path = '/openApi/swap/v1/positionSide/dual'
+    method = "POST"
+    paramsMap = {
+    "dualSidePosition": "true",
+    "timestamp": "1702731530753"
+}
+    paramsStr = parseParam(paramsMap)
+    return send_request(method, path, paramsStr, payload)
+
+def get_sign(api_secret, payload):
+    signature = hmac.new(api_secret.encode("utf-8"), payload.encode("utf-8"), digestmod=sha256).hexdigest()
+    print("sign=" + signature)
+    return signature
+
+
+def send_request(method, path, urlpa, payload):
+    url = "%s%s?%s&signature=%s" % (APIURL, path, urlpa, get_sign(SECRETKEY, urlpa))
+    print(url)
+    headers = {
+        'X-BX-APIKEY': APIKEY,
+    }
+    response = requests.request(method, url, headers=headers, data=payload)
+    return response.text
+
+def parseParam(paramsMap):
+    sortedKeys = sorted(paramsMap)
+    paramsStr = "&".join(["%s=%s" % (x, paramsMap[x]) for x in sortedKeys])
+    if paramsStr != "": 
+     return paramsStr+"&timestamp="+str(int(time.time() * 1000))
+    else:
+     return paramsStr+"timestamp="+str(int(time.time() * 1000))
+
+
+if __name__ == '__main__':
+    print("demo:", demo())
+```
