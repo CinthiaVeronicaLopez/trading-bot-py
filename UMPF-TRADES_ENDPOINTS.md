@@ -3549,3 +3549,114 @@ def parseParam(paramsMap):
 if __name__ == '__main__':
     print("demo:", demo())
 ```
+
+
+## Close position by position ID
+
+#### HTTP Request https://open-api.bingx.com
+
+### Interface Parameters
+    POST /openApi/swap/v1/trade/closePosition
+
+__rate limitation by UID: 5/s & rate limitation by IP in group Number:__ 2
+
+__API KEY permission:__ Perpetual Futures Trading
+
+Content-Type: request body (application/json) query string
+  
+Request
+```json
+{
+  "positionId": "string", // Position ID, will close the position with market price
+  "timestamp": "int64", // Request timestamp, in milliseconds
+  "recvWindow": "int64" // Request valid time window value, in milliseconds
+}
+{
+  "timestamp": "1702731721672",
+  "positionId": "1769649551460794368"
+}
+```
+Response
+```json
+{
+  "code": "int64", // Error code, 0 indicates success, non-zero indicates abnormal failure
+  "msg": "string", // Error message prompt
+  "data": "Data" // 
+}
+{
+  "code": 0,
+  "msg": "",
+  "timestamp": 0,
+  "data": {
+    "orderId": 1769649628749234200,
+    "positionId": "1769649551460794368",
+    "symbol": "BTC-USDT",
+    "side": "Ask",
+    "type": "Market",
+    "positionSide": "BOTH",
+    "origQty": "1.0000"
+  }
+}
+```
+Data
+```json
+{
+  "orderId": "int64", // Order ID
+  "positionId": "string", // Position ID
+  "symbol": "string", // 
+  "side": "string", // Buy/Sell direction
+  "type": "string", // MARKET: Market order
+  "positionSide": "string", // Position direction, MUST be BOTH for single position, LONG or SHORT for hedged position, default LONG when empty
+  "origQty": "string" // Order quantity, quantity of coins
+}
+```
+
+### Sample code
+```python
+import time
+import requests
+import hmac
+from hashlib import sha256
+
+APIURL = "https://open-api.bingx.com"
+APIKEY = ""
+SECRETKEY = ""
+
+def demo():
+    payload = {}
+    path = '/openApi/swap/v1/trade/closePosition'
+    method = "POST"
+    paramsMap = {
+    "timestamp": "1702731721672",
+    "positionId": "1769649551460794368"
+}
+    paramsStr = parseParam(paramsMap)
+    return send_request(method, path, paramsStr, payload)
+
+def get_sign(api_secret, payload):
+    signature = hmac.new(api_secret.encode("utf-8"), payload.encode("utf-8"), digestmod=sha256).hexdigest()
+    print("sign=" + signature)
+    return signature
+
+
+def send_request(method, path, urlpa, payload):
+    url = "%s%s?%s&signature=%s" % (APIURL, path, urlpa, get_sign(SECRETKEY, urlpa))
+    print(url)
+    headers = {
+        'X-BX-APIKEY': APIKEY,
+    }
+    response = requests.request(method, url, headers=headers, data=payload)
+    return response.text
+
+def parseParam(paramsMap):
+    sortedKeys = sorted(paramsMap)
+    paramsStr = "&".join(["%s=%s" % (x, paramsMap[x]) for x in sortedKeys])
+    if paramsStr != "": 
+     return paramsStr+"&timestamp="+str(int(time.time() * 1000))
+    else:
+     return paramsStr+"timestamp="+str(int(time.time() * 1000))
+
+
+if __name__ == '__main__':
+    print("demo:", demo())
+```
