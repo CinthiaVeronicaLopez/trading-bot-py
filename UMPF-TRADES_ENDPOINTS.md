@@ -3450,3 +3450,102 @@ def parseParam(paramsMap):
 if __name__ == '__main__':
     print("demo:", demo())
 ```
+
+
+## Cancel All After
+After the countdown ends, cancel all current pending orders. This request can be continuously maintained to constantly extend the penalty time.
+Rate limit: 1 time/1s
+
+> If you have a large amount of pending orders, they will be canceled in batches, which may take several seconds to cancel in batches. In addition, during the process of canceling all pending orders, the system will reject further ACTIVATE and CLOSE requests. After the system has completed the task of canceling all pending orders, it can continue to accept ACTIVATE and CLOSE requests.
+
+### HTTP request
+
+### Interface parameters
+  POST /openApi/swap/v2/trade/cancelAllAfter
+
+__rate limitation by UID: 2/s & rate limitation by IP in group Number:__ 2
+
+__API KEY permission:__ Perpetual Futures Trading
+
+Content-Type: request body (application/json) query string
+
+Request
+```json
+{
+  "type": "string", // Request type: ACTIVATE-Activate, CLOSE-Close
+  "timeOut": "int" // Activate countdown time (seconds), range: 10s-120s
+}
+{
+  "type": "ACTIVATE",
+  "timeOut": 10
+}
+```
+Response
+```json
+{
+  "triggerTime": "int", // Trigger time for deleting all pending orders
+  "status": "Status", // ACTIVATED (Activation successful)/CLOSED (Closed successfully)/FAILED (Failed)
+  "note": "string" // Explanation
+}
+{
+  "code": 0,
+  "msg": "",
+  "debugMsg": "",
+  "data": {
+    "triggerTime": 1710389137,
+    "status": "ACTIVATED",
+    "note": "All your spot pending orders will be closed automatically at 2024-03-14 04:05:37 UTC(+0),before that you can cancel the timer, or extend triggerTime time by this request"
+  }
+}
+```
+
+### Sample code
+```python
+
+import time
+import requests
+import hmac
+from hashlib import sha256
+
+APIURL = "https://open-api.bingx.com"
+APIKEY = ""
+SECRETKEY = ""
+
+def demo():
+    payload = {}
+    path = '/openApi/swap/v2/trade/cancelAllAfter'
+    method = "POST"
+    paramsMap = {
+    "type": "ACTIVATE",
+    "timeOut": 10
+}
+    paramsStr = parseParam(paramsMap)
+    return send_request(method, path, paramsStr, payload)
+
+def get_sign(api_secret, payload):
+    signature = hmac.new(api_secret.encode("utf-8"), payload.encode("utf-8"), digestmod=sha256).hexdigest()
+    print("sign=" + signature)
+    return signature
+
+
+def send_request(method, path, urlpa, payload):
+    url = "%s%s?%s&signature=%s" % (APIURL, path, urlpa, get_sign(SECRETKEY, urlpa))
+    print(url)
+    headers = {
+        'X-BX-APIKEY': APIKEY,
+    }
+    response = requests.request(method, url, headers=headers, data=payload)
+    return response.text
+
+def parseParam(paramsMap):
+    sortedKeys = sorted(paramsMap)
+    paramsStr = "&".join(["%s=%s" % (x, paramsMap[x]) for x in sortedKeys])
+    if paramsStr != "": 
+     return paramsStr+"&timestamp="+str(int(time.time() * 1000))
+    else:
+     return paramsStr+"timestamp="+str(int(time.time() * 1000))
+
+
+if __name__ == '__main__':
+    print("demo:", demo())
+```
