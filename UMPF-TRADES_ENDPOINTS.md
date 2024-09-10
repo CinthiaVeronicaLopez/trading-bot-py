@@ -4098,3 +4098,142 @@ def parseParam(paramsMap):
 if __name__ == '__main__':
     print("demo:", demo())
 ```
+
+
+## Query Position History
+Query the position history of perpetual contracts under the current account.
+
+#### HTTP Request https://open-api.bingx.com
+
+### API Parameters
+    GET /openApi/swap/v1/trade/positionHistory
+
+__rate limitation by UID: 5/s & rate limitation by IP in group Number:__ 2
+
+__API KEY permission:__ Read
+
+Content-Type: request body (application/json) query string
+  
+Request
+```json
+{
+  "symbol": "string", // Trading pair, e.g.: BTC-USDT, please use uppercase letters
+  "timestamp": "int64", // Request timestamp, in milliseconds
+  "positionId": "int64", // Position ID, if not provided, all position histories of the relevant trading pair will be returned by default
+  "startTs": "int64", // Start timestamp, in milliseconds, maximum time span is three months, if not provided, the default start time is 90 days ago
+  "endTs": "int64", // End timestamp, in milliseconds, maximum time span is three months, if not provided, the default end time is the current time
+  "pageIndex": "int64", // Page number, must be greater than 0, if not provided, the default is 1
+  "pageSize": "int64", // Page size, must be greater than 0, maximum value is 100, if not provided, the default is 1000
+  "recvWindow": "int64" // Request valid window value, in milliseconds
+}
+{
+  "recvWindow": "0",
+  "symbol": "BNB-USDT",
+  "pageId": 0,
+  "pageSize": 20,
+  "startTime": 1700409600000,
+  "1703001599000": 1703001599000,
+  "timestamp": "1702731661854"
+}
+```
+Response
+```json
+{
+  "symbol": "string", // Trading pair, e.g.: BTC-USDT
+  "positionId": "string", // Position ID
+  "positionSide": "string", // Position side LONG/SHORT
+  "isolated": "bool", // Isolated mode, true: isolated mode, false: cross margin
+  "closeAllPositions": "bool", // All positions closed
+  "positionAmt": "string", // Position amount
+  "closePositionAmt": "string", // Closed position amount
+  "realisedProfit": "string", // Realized profit and loss
+  "netProfit": "string", // Net profit and loss
+  "avgClosePrice": "float64", // Average close price
+  "avgPrice": "string", // Average open price
+  "leverage": "int", // Leverage
+  "positionCommission": "string", // Commission fee
+  "totalFunding": "string", // Funding fee
+  "openTime": "int64", // Open time
+  "closeTime": "int64" // Close time
+}
+{
+  "code": 0,
+  "msg": "",
+  "data": [
+    {
+      "positionId": "180870089***590996",
+      "symbol": "BTC-USDT",
+      "isolated": false,
+      "positionSide": "LONG",
+      "openTime": 1720062873000,
+      "updateTime": 1720062878000,
+      "avgPrice": "58942.31",
+      "avgClosePrice": "58930.00",
+      "realisedProfit": "-0.04",
+      "netProfit": "-0.16",
+      "positionAmt": "33.0000",
+      "closePositionAmt": "33.0000",
+      "leverage": 20,
+      "closeAllPositions": true,
+      "positionCommission": "-0.11669358690000001",
+      "totalFunding": "0.00000000000000001388"
+    }
+  ]
+}
+```
+
+### Sample code
+```python
+
+import time
+import requests
+import hmac
+from hashlib import sha256
+
+APIURL = "https://open-api.bingx.com"
+APIKEY = ""
+SECRETKEY = ""
+
+def demo():
+    payload = {}
+    path = '/openApi/swap/v1/trade/positionHistory'
+    method = "GET"
+    paramsMap = {
+    "recvWindow": "0",
+    "symbol": "BNB-USDT",
+    "pageId": 0,
+    "pageSize": 20,
+    "startTime": 1700409600000,
+    "1703001599000": 1703001599000,
+    "timestamp": "1702731661854"
+}
+    paramsStr = parseParam(paramsMap)
+    return send_request(method, path, paramsStr, payload)
+
+def get_sign(api_secret, payload):
+    signature = hmac.new(api_secret.encode("utf-8"), payload.encode("utf-8"), digestmod=sha256).hexdigest()
+    print("sign=" + signature)
+    return signature
+
+
+def send_request(method, path, urlpa, payload):
+    url = "%s%s?%s&signature=%s" % (APIURL, path, urlpa, get_sign(SECRETKEY, urlpa))
+    print(url)
+    headers = {
+        'X-BX-APIKEY': APIKEY,
+    }
+    response = requests.request(method, url, headers=headers, data=payload)
+    return response.text
+
+def parseParam(paramsMap):
+    sortedKeys = sorted(paramsMap)
+    paramsStr = "&".join(["%s=%s" % (x, paramsMap[x]) for x in sortedKeys])
+    if paramsStr != "": 
+     return paramsStr+"&timestamp="+str(int(time.time() * 1000))
+    else:
+     return paramsStr+"timestamp="+str(int(time.time() * 1000))
+
+
+if __name__ == '__main__':
+    print("demo:", demo())
+```
