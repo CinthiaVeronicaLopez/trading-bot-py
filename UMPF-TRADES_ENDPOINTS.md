@@ -3660,3 +3660,179 @@ def parseParam(paramsMap):
 if __name__ == '__main__':
     print("demo:", demo())
 ```
+
+
+## All Orders
+Query the user's historical orders (order status is fully executed, pending, newly created, partially executed, or cancelled.).
+
+#### HTTP Request https://open-api.bingx.com
+
+* The maximum query time range shall not exceed 7 days
+* Query data within the last 7 days by default
+
+1. Create API KEY
+2. Configure API KEY permissions
+3. Understanding signature authentication
+4. Run the following example code  
+5. Understand common error codes
+6. Understand rate limitations
+7. Understanding request timestamps
+8. Understand fee schedule
+
+### request parameters
+    GET /openApi/swap/v1/trade/fullOrder
+
+__rate limitation by UID: 5/s & rate limitation by IP in group Number:__ 2
+
+__API KEY permission:__ Read
+
+Content-Type: request body (application/json) query string
+  
+Request
+```json
+{
+  "symbol": "string", // There must be a hyphen/ "-" in the trading pair symbol. eg: BTC-USDT.If no symbol is specified, it will query the orders for all trading pairs.
+  "orderId": "int64", // Only return subsequent orders, and return the latest order by default
+  "startTime": "int64", // Start time, unit: millisecond
+  "endTime": "int64", // End time, unit: millisecond
+  "limit": "int", // number of result sets to return Default: 500 Maximum: 1000
+  "timestamp": "int64", // request timestamp in milliseconds
+  "recvWindow": "int64" // Request valid time window value, Unit: milliseconds
+}
+{
+  "endTime": "1702731995000",
+  "limit": "500",
+  "startTime": "1702688795000",
+  "symbol": "PYTH-USDT",
+  "timestamp": "1702731995838"
+}
+```
+Response
+```json
+{
+  "time": "int64", // order time, unit: millisecond
+  "symbol": "string", // trading pair, for example: BTC-USDT
+  "side": "string", // buying and selling direction
+  "type": "string", // LIMIT: Limit Order / MARKET: Market Order / STOP_MARKET: Stop Market Order / TAKE_PROFIT_MARKET: Take Profit Market Order / STOP: Stop Limit Order / TAKE_PROFIT: Take Profit Limit Order / TRIGGER_LIMIT: Stop Limit Order with Trigger / TRIGGER_MARKET: Stop Market Order with Trigger / TRAILING_STOP_MARKET: Trailing Stop Market Order
+  "positionSide": "string", // Position direction, required for single position as BOTH, for both long and short positions only LONG or SHORT can be chosen, defaults to LONG if empty
+  "reduceOnly": "string", // true, false; Default value is false for single position mode; This parameter is not accepted for both long and short positions mode
+  "cumQuote": "string", // transaction amount
+  "status": "string", // order status
+  "stopPrice": "string", // Trigger price
+  "price": "string", // Price
+  "origQty": "string", // original order quantity
+  "avgPrice": "string", // average transaction price
+  "executedQty": "string", // volume
+  "orderId": "int64", // Order ID
+  "profit": "string", // profit and loss
+  "commission": "string", // Fee
+  "workingType": "string", // StopPrice trigger price types: MARK_PRICE, CONTRACT_PRICE, INDEX_PRICE, default MARK_PRICE
+  "updateTime": "int64", // update time, unit: millisecond
+  "stopGuaranteed": "string", // true: Enables the guaranteed stop-loss and take-profit feature; false: Disables the feature. The guaranteed stop-loss feature is not enabled by default. Supported order types include: STOP_MARKET: Market stop-loss order / TAKE_PROFIT_MARKET: Market take-profit order / STOP: Limit stop-loss order / TAKE_PROFIT: Limit take-profit order / TRIGGER_LIMIT: Stop-limit order with trigger / TRIGGER_MARKET: Market order with trigger for stop-loss.
+  "triggerOrderId": "int64" // trigger order ID associated with this order
+}
+{
+  "code": 0,
+  "msg": "",
+  "data": {
+    "orders": [
+      {
+        "symbol": "PYTH-USDT",
+        "orderId": 1736007506620112100,
+        "side": "SELL",
+        "positionSide": "SHORT",
+        "type": "LIMIT",
+        "origQty": "33",
+        "price": "0.3916",
+        "executedQty": "33",
+        "avgPrice": "0.3916",
+        "cumQuote": "13",
+        "stopPrice": "",
+        "profit": "0.0000",
+        "commission": "-0.002585",
+        "status": "FILLED",
+        "time": 1702731418000,
+        "updateTime": 1702731470000,
+        "clientOrderId": "",
+        "leverage": "15X",
+        "takeProfit": {
+          "type": "TAKE_PROFIT",
+          "quantity": 0,
+          "stopPrice": 0,
+          "price": 0,
+          "workingType": ""
+        },
+        "stopLoss": {
+          "type": "STOP",
+          "quantity": 0,
+          "stopPrice": 0,
+          "price": 0,
+          "workingType": ""
+        },
+        "advanceAttr": 0,
+        "positionID": 0,
+        "takeProfitEntrustPrice": 0,
+        "stopLossEntrustPrice": 0,
+        "orderType": "",
+        "workingType": "MARK_PRICE",
+        "stopGuaranteed": false,
+        "triggerOrderId": 1736012449498123500
+      }
+    ]
+  }
+}
+```
+
+### Sample code
+```python
+
+import time
+import requests
+import hmac
+from hashlib import sha256
+
+APIURL = "https://open-api.bingx.com"
+APIKEY = ""
+SECRETKEY = ""
+
+def demo():
+    payload = {}
+    path = '/openApi/swap/v1/trade/fullOrder'
+    method = "GET"
+    paramsMap = {
+    "endTime": "1702731995000",
+    "limit": "500",
+    "startTime": "1702688795000",
+    "symbol": "PYTH-USDT",
+    "timestamp": "1702731995838"
+}
+    paramsStr = parseParam(paramsMap)
+    return send_request(method, path, paramsStr, payload)
+
+def get_sign(api_secret, payload):
+    signature = hmac.new(api_secret.encode("utf-8"), payload.encode("utf-8"), digestmod=sha256).hexdigest()
+    print("sign=" + signature)
+    return signature
+
+
+def send_request(method, path, urlpa, payload):
+    url = "%s%s?%s&signature=%s" % (APIURL, path, urlpa, get_sign(SECRETKEY, urlpa))
+    print(url)
+    headers = {
+        'X-BX-APIKEY': APIKEY,
+    }
+    response = requests.request(method, url, headers=headers, data=payload)
+    return response.text
+
+def parseParam(paramsMap):
+    sortedKeys = sorted(paramsMap)
+    paramsStr = "&".join(["%s=%s" % (x, paramsMap[x]) for x in sortedKeys])
+    if paramsStr != "": 
+     return paramsStr+"&timestamp="+str(int(time.time() * 1000))
+    else:
+     return paramsStr+"timestamp="+str(int(time.time() * 1000))
+
+
+if __name__ == '__main__':
+    print("demo:", demo())
+```
