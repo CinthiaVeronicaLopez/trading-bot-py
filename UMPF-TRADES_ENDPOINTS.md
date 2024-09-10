@@ -3948,3 +3948,153 @@ def parseParam(paramsMap):
 if __name__ == '__main__':
     print("demo:", demo())
 ```
+
+
+## Query historical transaction details
+Obtain the transaction history details of a certain transaction pair
+
+#### HTTP Request https://open-api.bingx.com
+
+### Explanation of Order List Retrieval Rules
+* Sorting: ORDER BY filledTime ASC, in ascending order of filledTime field
+* Maximum range: [From current date] up to past 7 days & maximum of 1000 historical filled orders, startTs = [current date] - 7 days
+* If both startTs and endTs are provided, the data range returned is: startTs < orderList <= endTs
+* If only endTs is provided, the data range returned is: ([current date] - 7 days) < orderList <= endTs
+* If only startTs is provided, no data is returned
+* If orderId is provided, only the filled orders of that orderId are returned
+
+1. Create API KEY
+2. Configure API KEY permissions
+3. Understanding signature authentication
+4. Run the following example code  
+5. Understand common error codes
+6. Understand rate limitations
+7. Understanding request timestamps
+8. Understand fee schedule
+
+### request parameters
+    GET /openApi/swap/v1/trade/fillHistory
+
+__rate limitation by UID: 5/s & rate limitation by IP in group Number:__ 2
+
+__API KEY permission:__ Read
+
+Content-Type: request body (application/json) query string
+  
+Request
+```json
+{
+  "symbol": "string", // Trading pair, e.g., BTC-USDT, please use uppercase letters
+  "orderId": "int64", // If orderId is provided, only the filled orders of that orderId are returned
+  "lastFillId": "int64", // The last tradeId of the last query, default is 0 if not filled in.
+  "startTs": "int64", // Starting timestamp in milliseconds
+  "endTs": "int64", // End timestamp in milliseconds
+  "timestamp": "int64", // request timestamp, unit: millisecond
+  "recvWindow": "int64", // Request valid time window value, Unit: milliseconds
+  "pageSize": "int64" // The size of each page must be greater than 0, the maximum value is 1000, if you do not fill in, then the default 50
+}
+{
+  "endTs": "1702731530000",
+  "startTs": "1702724330000",
+  "symbol": "WLD-USDT",
+  "lastFillId": 130753,
+  "pageSize": 50,
+  "timestamp": "1702731530753"
+}
+```
+Response
+```json
+{
+  "symbol": "string", // trading pair, for example: BTC-USDT
+  "qty": "string", // Transaction quantity
+  "price": "string", // Transaction price
+  "quoteQty": "string", // Transaction amount
+  "commission": "string", // commission
+  "commissionAsset": "string", // Asset unit, usually USDT
+  "orderId": "string", // order id
+  "tradeId": "string", // trade id
+  "filledTime": "string", // Match the transaction time in the format of 2006-01-02T15:04:05.999+0800
+  "side": "string", // buying and selling direction
+  "positionSide": "string", // Position direction, required for single position as BOTH, for both long and short positions only LONG or SHORT can be chosen, defaults to LONG if empty
+  "role": "string" // Active selling and buying, taker: active buying, maker: active selling
+}
+{
+  "code": 0,
+  "msg": "",
+  "data": {
+    "fill_orders": [
+      {
+        "filledTm": "2023-12-16T20:58:36Z",
+        "volume": "4.10",
+        "price": "3.1088",
+        "qty": "12.74",
+        "quoteQty": "211.40",
+        "commission": "-0.0025",
+        "commissionAsset": "USDT",
+        "orderId": "1736007768311123456",
+        "tradeId": "241512",
+        "filledTime": "2023-12-16T20:58:36.000+0800",
+        "symbol": "WLD-USDT",
+        "role": "maker",
+        "side": "buy",
+        "positionSide": "short"
+      }
+    ]
+  }
+}
+```
+
+### Sample code
+```python
+
+import time
+import requests
+import hmac
+from hashlib import sha256
+
+APIURL = "https://open-api.bingx.com"
+APIKEY = ""
+SECRETKEY = ""
+
+def demo():
+    payload = {}
+    path = '/openApi/swap/v1/trade/fillHistory'
+    method = "GET"
+    paramsMap = {
+    "endTs": "1702731530000",
+    "startTs": "1702724330000",
+    "symbol": "WLD-USDT",
+    "lastFillId": 130753,
+    "pageSize": 50,
+    "timestamp": "1702731530753"
+}
+    paramsStr = parseParam(paramsMap)
+    return send_request(method, path, paramsStr, payload)
+
+def get_sign(api_secret, payload):
+    signature = hmac.new(api_secret.encode("utf-8"), payload.encode("utf-8"), digestmod=sha256).hexdigest()
+    print("sign=" + signature)
+    return signature
+
+
+def send_request(method, path, urlpa, payload):
+    url = "%s%s?%s&signature=%s" % (APIURL, path, urlpa, get_sign(SECRETKEY, urlpa))
+    print(url)
+    headers = {
+        'X-BX-APIKEY': APIKEY,
+    }
+    response = requests.request(method, url, headers=headers, data=payload)
+    return response.text
+
+def parseParam(paramsMap):
+    sortedKeys = sorted(paramsMap)
+    paramsStr = "&".join(["%s=%s" % (x, paramsMap[x]) for x in sortedKeys])
+    if paramsStr != "": 
+     return paramsStr+"&timestamp="+str(int(time.time() * 1000))
+    else:
+     return paramsStr+"timestamp="+str(int(time.time() * 1000))
+
+
+if __name__ == '__main__':
+    print("demo:", demo())
+```
