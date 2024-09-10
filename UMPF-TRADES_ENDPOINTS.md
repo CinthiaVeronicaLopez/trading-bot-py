@@ -3836,3 +3836,115 @@ def parseParam(paramsMap):
 if __name__ == '__main__':
     print("demo:", demo())
 ```
+
+
+## Position and Maintenance Margin Ratio
+Get information on Position and Maintenance Margin Ratio
+
+#### HTTP Request https://open-api.bingx.com
+
+### API Parameters
+    GET /openApi/swap/v1/maintMarginRatio
+
+__rate limitation by UID: 5/s & rate limitation by IP in group Number:__ 2
+
+__API KEY permission:__ Read
+
+Content-Type: request body (application/json) query string
+  
+Request
+```json
+{
+  "symbol": "string", // Trading pair, e.g., BTC-USDT, please use uppercase letters
+  "timestamp": "int64", // Request timestamp in milliseconds
+  "recvWindow": "int64" // Request valid time window in milliseconds
+}
+{
+  "symbol": "BTC-USDT",
+  "timestamp": "1702732072912",
+  "recvWindow": "5000"
+}
+```
+Response
+```json
+{
+  "symbol": "string", // Trading pair
+  "minPositionVal": "string", // Minimum position value
+  "maxPositionVal": "string", // Maximum position value
+  "maintMarginRatio": "string", // Maintenance margin ratio
+  "maintAmount": "string" // Maintenance margin quick calculation amount
+}
+{
+  "code": 0,
+  "msg": "",
+  "timestamp": 1716388317402,
+  "data": [
+    {
+      "symbol": "BTC-USDT",
+      "minPositionVal": "0",
+      "maxPositionVal": "150000",
+      "maintMarginRatio": "0.003800",
+      "maintAmount": "0.000000"
+    },
+    {
+      "symbol": "BTC-USDT",
+      "minPositionVal": "150000",
+      "maxPositionVal": "900000",
+      "maintMarginRatio": "0.004000",
+      "maintAmount": "30.000000"
+    }
+  ]
+}
+```
+
+### Sample code
+```python
+
+import time
+import requests
+import hmac
+from hashlib import sha256
+
+APIURL = "https://open-api.bingx.com"
+APIKEY = ""
+SECRETKEY = ""
+
+def demo():
+    payload = {}
+    path = '/openApi/swap/v1/maintMarginRatio'
+    method = "GET"
+    paramsMap = {
+    "symbol": "BTC-USDT",
+    "timestamp": "1702732072912",
+    "recvWindow": "5000"
+}
+    paramsStr = parseParam(paramsMap)
+    return send_request(method, path, paramsStr, payload)
+
+def get_sign(api_secret, payload):
+    signature = hmac.new(api_secret.encode("utf-8"), payload.encode("utf-8"), digestmod=sha256).hexdigest()
+    print("sign=" + signature)
+    return signature
+
+
+def send_request(method, path, urlpa, payload):
+    url = "%s%s?%s&signature=%s" % (APIURL, path, urlpa, get_sign(SECRETKEY, urlpa))
+    print(url)
+    headers = {
+        'X-BX-APIKEY': APIKEY,
+    }
+    response = requests.request(method, url, headers=headers, data=payload)
+    return response.text
+
+def parseParam(paramsMap):
+    sortedKeys = sorted(paramsMap)
+    paramsStr = "&".join(["%s=%s" % (x, paramsMap[x]) for x in sortedKeys])
+    if paramsStr != "": 
+     return paramsStr+"&timestamp="+str(int(time.time() * 1000))
+    else:
+     return paramsStr+"timestamp="+str(int(time.time() * 1000))
+
+
+if __name__ == '__main__':
+    print("demo:", demo())
+```
