@@ -1,37 +1,40 @@
 # BingX API Docs
 # USDT-M Perp FuturesCoin-M Perp 
 # Trades Endpoints
-1. Test Order
-2. Place order
-3. Place order in demo trading
-4. Place multiple orders
-5. Close All Positions
-6. Cancel Order
-7. Cancel multiple orders
-8. Cancel All Open Orders
-9. Current All Open Orders
-10. Query pending order status
-11. Query Order details
-12. Query Margin Type
-13. Change Margin Type
-14. Query Leverage
-15. Set Leverage
-16. User's Force Orders
-17. Query Order history
-18. Modify Isolated Position Margin
-19. Query historical transaction orders
-20. Set Position Mode
-21. Query position mode
-22. Cancel an Existing Order and Send a New Orde
-23. Cancel orders in batches and place orders in batches
-24. Cancel All After
-25. Close position by position ID
-26. All Orders
-27. Position and Maintenance Margin Ratio
-28. Query historical transaction details
-29. Query Position History
+## Index
+1. [Test Order](#test-order)
+2. [Place order](#place-order)
+3. [Place order in demo trading](#place-order-in-demo-trading)
+4. [Place multiple orders](#place-multiple-orders)
+5. [Close All Positions](#close-all-positions)
+6. [Cancel Order](#cancel-order)
+7. [Cancel multiple orders](#cancel-multiple-orders)
+8. [Cancel All Open Orders](#cancel-all-open-orders)
+9. [Current All Open Orders](#current-all-open-orders)
+10. [Query pending order status](#query-pending-order-status)
+11. [Query Order details](#query-order-details)
+12. [Query Margin Type](#query-margin-type)
+13. [Change Margin Type](#change-margin-type)
+14. [Query Leverage](#query-leverage)
+15. [Set Leverage](#set-leverage)
+16. [User's Force Orders](#users-force-orders)
+17. [Query Order history](#query-order-history)
+18. [Modify Isolated Position Margin](#modify-isolated-position-margin)
+19. [Query historical transaction orders](#query-historical-transaction-orders)
+20. [Set Position Mode](#set-position-mode)
+21. [Query position mode](#query-position-mode)
+22. [Cancel an Existing Order and Send a New Orde](#cancel-an-existing-order-and-send-a-new-order)
+23. [Cancel orders in batches and place orders in batches](#cancel-orders-in-batches-and-place-orders-in-batches)
+24. [Cancel All After](#cancel-all-after)
+25. [Close position by position ID](#close-position-by-position-id)
+26. [All Orders](#all-orders)
+27. [Position and Maintenance Margin Ratio](#position-and-maintenance-margin-ratio)
+28. [Query historical transaction details](#query-historical-transaction-details)
+29. [Query Position History](#query-position-history)
 
-### Test Order
+
+[Index](#index)
+## Test Order
 __HTTP Request https://open-api.bingx.com__
 
 > The participation and return are consistent with the ordering interface, but the actual order will not be placed, only the test results will be returned.The result is a fake order, and your funds will not be deducted. It will not appear on the real transaction panel and is only used to help you practice using the order interface
@@ -204,7 +207,8 @@ if __name__ == '__main__':
 ```
 
 
-### Place order
+[Index](#index)
+## Place order 
 The current account places an order on the specified symbol contract. (Supports limit order, market order, market order for plan entrustment, limit order for plan entrustment, position stop profit and stop loss order, and liquidation for positions)
 #### HTTP Request https://open-api.bingx.com
 
@@ -398,6 +402,8 @@ if __name__ == '__main__':
     print("demo:", demo())
 ```
 
+
+[Index](#index)
 ## Place order in demo trading
 The current account places an order on the specified symbol contract. (Supports limit order, market order, market order for plan entrustment, limit order for plan entrustment, position stop profit and stop loss order, and liquidation for positions)
 > demo trading domain: open-api-vst.bingx.com
@@ -575,6 +581,8 @@ if __name__ == '__main__':
     print("demo:", demo())
 ```
 
+
+[Index](#index)
 ## Close All Positions
 One-click liquidation of all positions under the current account. Note that one-click liquidation is triggered by a market order.
 
@@ -677,6 +685,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Cancel Order
 Cancel an order that the current account is in the current entrusted state.
 
@@ -787,6 +796,7 @@ Response
 ```
 
 
+[Index](#index)
 ## Cancel multiple orders
 Batch cancellation of some of the orders whose current account is in the current entrusted state.
 
@@ -999,6 +1009,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Cancel All Open Orders
 Cancel all orders in the current entrusted state of the current account.
 
@@ -1224,6 +1235,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Current All Open Orders
 Query all orders that the user is currently entrusted with.
 
@@ -1441,6 +1453,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Query pending order status
 Query order details
 
@@ -1605,6 +1618,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Query Order details
 Query order details
 
@@ -1776,6 +1790,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Query Margin Type
 Query the user's margin mode on the specified symbol contract: isolated or cross.
 
@@ -1880,6 +1895,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Change Margin Type
 Change the user's margin mode on the specified symbol contract: isolated margin or cross margin.
 
@@ -1987,6 +2003,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Query Leverage
 Query the opening leverage of the user in the specified symbol contract.
 
@@ -2096,6 +2113,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Set Leverage
 Adjust the user's opening leverage in the specified symbol contract.
 
@@ -2207,6 +2225,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## User's Force Orders
 Query the user's forced liquidation order.
 
@@ -2371,6 +2390,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Query Order history
 Query the user's historical orders (order status is completed or canceled).
 
@@ -2544,6 +2564,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Modify Isolated Position Margin
 Adjust the isolated margin funds for the positions in the isolated position mode.
 
@@ -2654,6 +2675,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Query historical transaction orders
 Obtain the transaction history of a certain transaction pair
 
@@ -2798,6 +2820,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Set Position Mode
 Used to set the position mode of perpetual contract, supporting both dual position mode and single position mode
 
@@ -2891,6 +2914,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Query position mode
 Used to get the position mode of perpetual contract, supporting both dual position mode and single position mode
 
@@ -2979,6 +3003,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Cancel an Existing Order and Send a New Order
 This interface is used to cancel an order and place a new one on the same trading pair.
 
@@ -3155,7 +3180,6 @@ NewOrderResponse
 }
 ```
 
-
 ### Sample code
 ```python
 
@@ -3217,6 +3241,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Cancel orders in batches and place orders in batches
 This interface is used to cancel orders in batches and place orders in batches.
 
@@ -3452,6 +3477,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Cancel All After
 After the countdown ends, cancel all current pending orders. This request can be continuously maintained to constantly extend the penalty time.
 Rate limit: 1 time/1s
@@ -3551,6 +3577,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Close position by position ID
 
 #### HTTP Request https://open-api.bingx.com
@@ -3662,6 +3689,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## All Orders
 Query the user's historical orders (order status is fully executed, pending, newly created, partially executed, or cancelled.).
 
@@ -3838,6 +3866,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Position and Maintenance Margin Ratio
 Get information on Position and Maintenance Margin Ratio
 
@@ -3950,6 +3979,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Query historical transaction details
 Obtain the transaction history details of a certain transaction pair
 
@@ -4100,6 +4130,7 @@ if __name__ == '__main__':
 ```
 
 
+[Index](#index)
 ## Query Position History
 Query the position history of perpetual contracts under the current account.
 
