@@ -41,6 +41,7 @@ PATH = {
     # TRADES ENDPOINTS
     "test": "/openApi/swap/v2/trade/order/test",
     "place": "/openApi/swap/v2/trade/order",
+    "batchOrders": "/openApi/swap/v2/trade/batchOrders",
     "close": "/openApi/swap/v1/trade/closePosition",
     "close-all": "/openApi/swap/v2/trade/closeAllPositions",
     "cancel": "/openApi/swap/v2/trade/order",
@@ -238,16 +239,44 @@ class TradesEndpoints:
 
     # TRADES ENDPOINTS
     def serialize_to_json(
-        self, start_price, stop_price, type="TAKE_PROFIT_MARKET", working_type="MARK_PRICE"
+        self,
+        start_price,
+        stop_price,
+        type="TAKE_PROFIT_MARKET",
+        working_type="MARK_PRICE",
     ):
         data = {
             "type": type,
             "stopPrice": stop_price,
-            "price": price,
+            "price": start_price,
             "workingType": working_type,
         }
         print("data", data)
         return json.dumps(data)
+
+    def gen_params_map(
+        self,
+        side,
+        quantity,
+        price=False,
+        take_profit=False,
+        type="MARKET",
+        positionSide="LONG",
+        symbol=SYMBOL,
+    ):
+        params_map = {
+            "symbol": symbol,
+            "side": side,
+            "positionSide": positionSide,
+            "type": type,
+            "quantity": quantity,
+            # "clientOrderID": str(uuid.uuid4()),
+        }
+        if not bool(take_profit) and bool(price):
+            params_map["price"] = str(price)
+        if take_profit:
+            params_map["takeProfit"] = take_profit
+        return params_map
 
     def place_order(
         self,
@@ -262,18 +291,9 @@ class TradesEndpoints:
     ):
         self.path = PATH[path]
         self.method = "POST"
-        self.params_map = {
-            "symbol": symbol,
-            "side": side,
-            "positionSide": positionSide,
-            "type": type,
-            "quantity": str(quantity),
-            "clientOrderID": str(uuid.uuid4()),
-        }
-        if not bool(take_profit) and bool(price):
-            self.params_map["price"] = str(price)
-        if take_profit:
-            self.params_map["takeProfit"] = take_profit
+        self.params_map = self.gen_params_map(
+            side, quantity, price, take_profit, type, positionSide, symbol
+        )
         return self.send_request()
 
     def test_order(
@@ -288,19 +308,31 @@ class TradesEndpoints:
     ):
         response = self.symbol_price_ticker()
         data = response["data"]
-        start_price = float(data["price"]) #* 1.001
+        start_price = float(data["price"])  # * 1.001
         stop_price = float(start_price) * 1.01
         take_profit = self.serialize_to_json(start_price, stop_price)
-        return self.place(
-            side,
-            quantity,
-            price,
-            take_profit,
-            type,
-            positionSide,
-            symbol,
-            "test"
+        return self.place_order(
+            side, quantity, price, take_profit, type, positionSide, symbol, "test"
         )
+
+    def place_multiple_orders(
+        self,
+        # side,
+        # quantity,
+        # price=False,
+        # take_profit=False,
+        batchOrders=[],
+        # type="MARKET",
+        # positionSide="LONG",
+        # symbol=SYMBOL,
+        path="batchOrders",
+    ):
+        self.path = PATH[path]
+        self.method = "POST"
+        if len(batchOrders) > 0:
+            self.params_map = { "batchOrders": batchOrders }
+            print("self.params_map",self.params_map)
+            return self.send_request()
 
     def pending(self, order_id, symbol=SYMBOL):
         self.path = PATH["pending"]
