@@ -238,7 +238,7 @@ class TradesEndpoints:
 
     # TRADES ENDPOINTS
     def serialize_to_json(
-        price, stop_price, type="TAKE_PROFIT_MARKET", working_type="MARK_PRICE"
+        self, start_price, stop_price, type="TAKE_PROFIT_MARKET", working_type="MARK_PRICE"
     ):
         data = {
             "type": type,
@@ -246,6 +246,7 @@ class TradesEndpoints:
             "price": price,
             "workingType": working_type,
         }
+        print("data", data)
         return json.dumps(data)
 
     def place(
@@ -257,8 +258,9 @@ class TradesEndpoints:
         type="MARKET",
         positionSide="LONG",
         symbol=SYMBOL,
+        path="place",
     ):
-        self.path = PATH["place"]
+        self.path = PATH[path]
         self.method = "POST"
         self.params_map = {
             "symbol": symbol,
@@ -268,7 +270,7 @@ class TradesEndpoints:
             "quantity": str(quantity),
             "clientOrderID": str(uuid.uuid4()),
         }
-        if price:
+        if not bool(take_profit) and bool(price):
             self.params_map["price"] = str(price)
         if take_profit:
             self.params_map["takeProfit"] = take_profit
@@ -279,13 +281,25 @@ class TradesEndpoints:
         side="BUY",
         quantity=5,
         price=False,
-        take_profit=serialize_to_json(61000,60300),
+        take_profit=False,
         type="MARKET",
         positionSide="LONG",
         symbol=SYMBOL,
     ):
+        response = self.symbol_price_ticker()
+        data = response["data"]
+        start_price = float(data["price"]) #* 1.001
+        stop_price = float(start_price) * 1.01
+        take_profit = self.serialize_to_json(start_price, stop_price)
         return self.place(
-            side, quantity, price, take_profit, type, positionSide, symbol
+            side,
+            quantity,
+            price,
+            take_profit,
+            type,
+            positionSide,
+            symbol,
+            "test"
         )
 
     def pending(self, order_id, symbol=SYMBOL):
