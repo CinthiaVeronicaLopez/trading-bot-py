@@ -249,7 +249,7 @@ class TradesEndpoints:
         print("data", data)
         return json.dumps(data)
 
-    def place(
+    def place_order(
         self,
         side,
         quantity,
@@ -336,4 +336,4 @@ class TradesEndpoints:
         return self.send_request()
 
     def long(self, price, quantity, type="LIMIT", symbol=SYMBOL):
-        return self.place("BUY", quantity, price, False, type, "LONG", symbol)
+        return self.place_order("BUY", quantity, price, False, type, "LONG", symbol)
