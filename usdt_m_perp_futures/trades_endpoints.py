@@ -270,7 +270,7 @@ class TradesEndpoints:
             "positionSide": positionSide,
             "type": type,
             "quantity": quantity,
-            # "clientOrderID": str(uuid.uuid4()),
+            "clientOrderID": str(uuid.uuid4()),
         }
         if not bool(take_profit) and bool(price):
             params_map["price"] = str(price)
@@ -317,14 +317,7 @@ class TradesEndpoints:
 
     def place_multiple_orders(
         self,
-        # side,
-        # quantity,
-        # price=False,
-        # take_profit=False,
         batchOrders=[],
-        # type="MARKET",
-        # positionSide="LONG",
-        # symbol=SYMBOL,
         path="batchOrders",
     ):
         self.path = PATH[path]
@@ -334,6 +327,21 @@ class TradesEndpoints:
             print("self.params_map",self.params_map)
             return self.send_request()
 
+    def close_all_positions(self, symbol=SYMBOL):
+        self.path = PATH["close-all"]
+        self.method = "POST"
+        self.params_map = {
+            "symbol": symbol,
+        }
+        return self.send_request()
+    
+    def cancel_order(self, order_id, symbol=SYMBOL):
+        # TODO: this doesn't work
+        self.path = PATH["cancel"]
+        self.method = "DELETE"
+        self.params_map = {"orderId": order_id, "symbol": symbol}
+        return self.send_request()
+    
     def pending(self, order_id, symbol=SYMBOL):
         self.path = PATH["pending"]
         self.method = "GET"
@@ -346,25 +354,10 @@ class TradesEndpoints:
         self.params_map = {"symbol": symbol}
         return self.send_request()
 
-    def close_all(self, symbol=SYMBOL):
-        self.path = PATH["close-all"]
-        self.method = "POST"
-        self.params_map = {
-            "symbol": symbol,
-        }
-        return self.send_request()
-
     def close(self, position_id):
         self.path = PATH["close"]
         self.method = "POST"
         self.params_map = {"positionId": position_id}
-        return self.send_request()
-
-    def cancel_order(self, order_id, symbol=SYMBOL):
-        # TODO: this doesn't work
-        self.path = PATH["cancel"]
-        self.method = "DELETE"
-        self.params_map = {"orderId": order_id, "symbol": symbol}
         return self.send_request()
 
     def long(self, price, quantity, type="LIMIT", symbol=SYMBOL):
