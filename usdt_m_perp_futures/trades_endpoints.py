@@ -369,7 +369,7 @@ class TradesEndpoints:
         self.params_map = {"symbol": symbol}
         return self.send_request()
 
-    def pending(self, order_id, symbol=SYMBOL):
+    def query_pending_order_status(self, order_id, symbol=SYMBOL):
         self.path = PATH["pending"]
         self.method = "GET"
         self.params_map = {"orderId": order_id, "symbol": symbol}
