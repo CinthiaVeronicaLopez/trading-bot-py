@@ -53,6 +53,8 @@ PATH = {
     "marginType": "/openApi/swap/v2/trade/marginType",
     "changeMarginType": "/openApi/swap/v2/trade/marginType",
     "leverage": "/openApi/swap/v2/trade/leverage",
+    "setLeverage": "/openApi/swap/v2/trade/leverage",
+    "forceOrders": "/openApi/swap/v2/trade/forceOrders",
 }
 
 
@@ -400,6 +402,18 @@ class TradesEndpoints:
         self.params_map = {"symbol": symbol}
         return self.send_request()
 
+    def set_leverage(self, leverage="5", side="SHORT", symbol=SYMBOL):
+        self.path = PATH["setLeverage"]
+        self.method = "POST"
+        self.params_map = {"leverage": leverage, "side": side, "symbol": symbol}
+        return self.send_request()
+    
+    def users_force_orders(self, symbol=SYMBOL):
+        self.path = PATH["forceOrders"]
+        self.method = "GET"
+        self.params_map = {"symbol": symbol}
+        return self.send_request()
+    
     def close(self, position_id):
         self.path = PATH["close"]
         self.method = "POST"
