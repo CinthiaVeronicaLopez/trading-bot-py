@@ -42,9 +42,11 @@ PATH = {
     "test": "/openApi/swap/v2/trade/order/test",
     "place": "/openApi/swap/v2/trade/order",
     "batchOrders": "/openApi/swap/v2/trade/batchOrders",
+    "cancel": "/openApi/swap/v2/trade/order",
+    "cancelMultipleOrders": "/openApi/swap/v2/trade/batchOrders",
+    "cancelAllOpenOrders": "/openApi/swap/v2/trade/allOpenOrders",
     "close": "/openApi/swap/v1/trade/closePosition",
     "close-all": "/openApi/swap/v2/trade/closeAllPositions",
-    "cancel": "/openApi/swap/v2/trade/order",
     "current": "/openApi/swap/v2/trade/openOrders",
     "pending": "/openApi/swap/v2/trade/openOrder",
 }
@@ -336,10 +338,28 @@ class TradesEndpoints:
         return self.send_request()
     
     def cancel_order(self, order_id, symbol=SYMBOL):
-        # TODO: this doesn't work
+        # TODO: this doesn't work, see https://bingx-api.github.io/docs/#/en-us/swapV2/trade-api.html#Cancel%20Order
         self.path = PATH["cancel"]
         self.method = "DELETE"
         self.params_map = {"orderId": order_id, "symbol": symbol}
+        return self.send_request()
+    
+    def cancel_multiple_orders(self, clientOrderIdList, symbol=SYMBOL): 
+        # TODO: this doesn't work, see https://bingx-api.github.io/docs/#/en-us/swapV2/trade-api.html#Cancel%20multiple%20orders       
+        self.path = PATH["cancelMultipleOrders"]
+        self.method = "DELETE"
+        print("clientOrderIdList",clientOrderIdList)
+        self.params_map = {           
+            "clientOrderIDList": clientOrderIdList,
+            "symbol": symbol
+        }
+        return self.send_request()
+    
+    def cancel_all_open_orders(self, symbol=SYMBOL):
+        # TODO: this doesn't work, see https://bingx-api.github.io/docs/#/en-us/swapV2/trade-api.html#Cancel%20All%20Open%20Orders
+        self.path = PATH["cancelAllOpenOrders"]
+        self.method = "DELETE"
+        self.params_map = {"symbol": symbol}
         return self.send_request()
     
     def pending(self, order_id, symbol=SYMBOL):
