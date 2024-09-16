@@ -55,7 +55,14 @@ PATH = {
     "leverage": "/openApi/swap/v2/trade/leverage",
     "setLeverage": "/openApi/swap/v2/trade/leverage",
     "forceOrders": "/openApi/swap/v2/trade/forceOrders",
+    "allOrders": "/openApi/swap/v2/trade/allOrders",
 }
+
+
+def getTimestamp(minutes=0):
+    minutes = minutes * 60
+    current = time.time()
+    return int(current + minutes)
 
 
 class TradesEndpoints:
@@ -407,13 +414,30 @@ class TradesEndpoints:
         self.method = "POST"
         self.params_map = {"leverage": leverage, "side": side, "symbol": symbol}
         return self.send_request()
-    
+
     def users_force_orders(self, symbol=SYMBOL):
         self.path = PATH["forceOrders"]
         self.method = "GET"
         self.params_map = {"symbol": symbol}
         return self.send_request()
-    
+
+    def query_order_history(
+        self,
+        endTime=getTimestamp(24 * 60),
+        limit="500",
+        startTime=getTimestamp(),
+        symbol=SYMBOL,
+    ):
+        self.path = PATH["allOrders"]
+        self.method = "GET"
+        self.params_map = {
+            "endTime": endTime,
+            "limit": limit,
+            "startTime": startTime,
+            "symbol": symbol,
+        }
+        return self.send_request()
+
     def close(self, position_id):
         self.path = PATH["close"]
         self.method = "POST"
