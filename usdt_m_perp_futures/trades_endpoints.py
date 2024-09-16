@@ -50,7 +50,8 @@ PATH = {
     "current": "/openApi/swap/v2/trade/openOrders",
     "pending": "/openApi/swap/v2/trade/openOrder",
     "order": "/openApi/swap/v2/trade/order",
-    "marginType":"/openApi/swap/v2/trade/marginType",
+    "marginType": "/openApi/swap/v2/trade/marginType",
+    "changeMarginType": "/openApi/swap/v2/trade/marginType",
 }
 
 
@@ -380,12 +381,18 @@ class TradesEndpoints:
         self.params_map = {"orderId": order_id, "symbol": symbol}
         return self.send_request()
 
-    def query_margin_type(self, symbol=SYMBOL):        
+    def query_margin_type(self, symbol=SYMBOL):
         self.path = PATH["marginType"]
         self.method = "GET"
         self.params_map = {"symbol": symbol}
         return self.send_request()
-    
+
+    def change_margin_type(self, margin_type="CROSSED", symbol=SYMBOL):
+        self.path = PATH["changeMarginType"]
+        self.method = "POST"
+        self.params_map = {"marginType": margin_type, "symbol": symbol}
+        return self.send_request()
+
     def close(self, position_id):
         self.path = PATH["close"]
         self.method = "POST"
