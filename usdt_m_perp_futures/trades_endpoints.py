@@ -52,6 +52,7 @@ PATH = {
     "order": "/openApi/swap/v2/trade/order",
     "marginType": "/openApi/swap/v2/trade/marginType",
     "changeMarginType": "/openApi/swap/v2/trade/marginType",
+    "leverage": "/openApi/swap/v2/trade/leverage",
 }
 
 
@@ -391,6 +392,12 @@ class TradesEndpoints:
         self.path = PATH["changeMarginType"]
         self.method = "POST"
         self.params_map = {"marginType": margin_type, "symbol": symbol}
+        return self.send_request()
+
+    def query_leverage(self, symbol=SYMBOL):
+        self.path = PATH["leverage"]
+        self.method = "GET"
+        self.params_map = {"symbol": symbol}
         return self.send_request()
 
     def close(self, position_id):
