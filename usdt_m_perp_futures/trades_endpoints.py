@@ -361,17 +361,18 @@ class TradesEndpoints:
         self.method = "DELETE"
         self.params_map = {"symbol": symbol}
         return self.send_request()
-    
+
+    def current_all_open_orders(self, symbol=SYMBOL):
+        # TODO: this doesn't work, see https://bingx-api.github.io/docs/#/en-us/swapV2/trade-api.html#Current%20All%20Open%20Orders
+        self.path = PATH["current"]
+        self.method = "GET"
+        self.params_map = {"symbol": symbol}
+        return self.send_request()
+
     def pending(self, order_id, symbol=SYMBOL):
         self.path = PATH["pending"]
         self.method = "GET"
         self.params_map = {"orderId": order_id, "symbol": symbol}
-        return self.send_request()
-
-    def current(self, symbol=SYMBOL):
-        self.path = PATH["current"]
-        self.method = "GET"
-        self.params_map = {"symbol": symbol}
         return self.send_request()
 
     def close(self, position_id):
