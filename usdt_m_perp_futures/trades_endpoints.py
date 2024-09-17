@@ -57,6 +57,7 @@ PATH = {
     "forceOrders": "/openApi/swap/v2/trade/forceOrders",
     "allOrders": "/openApi/swap/v2/trade/allOrders",
     "positionMargin": "/openApi/swap/v2/trade/positionMargin",
+    "allFillOrders": "/openApi/swap/v2/trade/allFillOrders",
 }
 
 
@@ -449,6 +450,23 @@ class TradesEndpoints:
             "type": str(type),
             "amount": str(amount),
             "positionSide": positionSide,
+        }
+        return self.send_request()
+
+    def query_historical_transaction_orders(
+        self,
+        endTs=getTimestamp(24 * 60),
+        startTs=getTimestamp(),
+        tradingUnit="COIN",
+        symbol=SYMBOL,
+    ):
+        self.path = PATH["allFillOrders"]
+        self.method = "GET"
+        self.params_map = {
+            "endTs": endTs,
+            "startTs": startTs,
+            "symbol": symbol,
+            "tradingUnit": tradingUnit,
         }
         return self.send_request()
 
