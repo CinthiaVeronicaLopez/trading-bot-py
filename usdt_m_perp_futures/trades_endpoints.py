@@ -56,6 +56,7 @@ PATH = {
     "setLeverage": "/openApi/swap/v2/trade/leverage",
     "forceOrders": "/openApi/swap/v2/trade/forceOrders",
     "allOrders": "/openApi/swap/v2/trade/allOrders",
+    "positionMargin": "/openApi/swap/v2/trade/positionMargin",
 }
 
 
@@ -435,6 +436,19 @@ class TradesEndpoints:
             "limit": limit,
             "startTime": startTime,
             "symbol": symbol,
+        }
+        return self.send_request()
+
+    def modify_isolated_position_margin(
+        self, amount=3, type=1, positionSide="LONG", symbol=SYMBOL
+    ):
+        self.path = PATH["positionMargin"]
+        self.method = "POST"
+        self.params_map = {
+            "symbol": symbol,
+            "type": str(type),
+            "amount": str(amount),
+            "positionSide": positionSide,
         }
         return self.send_request()
 
