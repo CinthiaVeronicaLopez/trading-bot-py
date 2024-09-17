@@ -60,6 +60,7 @@ PATH = {
     "allFillOrders": "/openApi/swap/v2/trade/allFillOrders",
     "setDual": "/openApi/swap/v1/positionSide/dual",
     "dual": "/openApi/swap/v1/positionSide/dual",
+    "cancelReplace": "/openApi/swap/v1/trade/cancelReplace",
 }
 
 
@@ -482,6 +483,41 @@ class TradesEndpoints:
         self.path = PATH["dual"]
         self.method = "GET"
         self.params_map = {}
+        return self.send_request()
+    
+    def cancel_existing_order_send_new_order(
+        self,
+        cancelReplaceMode="STOP_ON_FAILURE",
+        cancelClientOrderId="abc123test",
+        cancelOrderId=123456789,
+        cancelRestrictions="ONLY_NEWS",
+        side="BUY",
+        quantity=5,
+        price=False,
+        take_profit=False,
+        type="MARKET",
+        positionSide="LONG",
+        symbol=SYMBOL,
+    ):
+        self.path = PATH["cancelReplace"]
+        self.method = "POST"
+        params_map = {
+            "cancelReplaceMode": cancelReplaceMode,
+            "cancelClientOrderId": cancelClientOrderId,
+            "cancelOrderId": cancelOrderId,
+            "cancelRestrictions": cancelRestrictions,
+            "symbol": symbol,
+            "side": side,
+            "positionSide": positionSide,
+            "type": type,
+            "quantity": quantity,
+            "clientOrderID": str(uuid.uuid4()),
+        }
+        if not bool(take_profit) and bool(price):
+            params_map["price"] = str(price)
+        if take_profit:
+            params_map["takeProfit"] = take_profit
+        self.params_map = params_map
         return self.send_request()
     
     def close(self, position_id):
