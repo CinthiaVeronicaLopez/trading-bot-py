@@ -58,6 +58,7 @@ PATH = {
     "allOrders": "/openApi/swap/v2/trade/allOrders",
     "positionMargin": "/openApi/swap/v2/trade/positionMargin",
     "allFillOrders": "/openApi/swap/v2/trade/allFillOrders",
+    "dual": "/openApi/swap/v1/positionSide/dual",
 }
 
 
@@ -468,6 +469,12 @@ class TradesEndpoints:
             "symbol": symbol,
             "tradingUnit": tradingUnit,
         }
+        return self.send_request()
+
+    def set_position_mode(self, dualSidePosition=True):
+        self.path = PATH["dual"]
+        self.method = "POST"
+        self.params_map = {"dualSidePosition": str(dualSidePosition).lower()}
         return self.send_request()
 
     def close(self, position_id):
