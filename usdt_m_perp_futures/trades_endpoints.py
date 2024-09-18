@@ -64,6 +64,7 @@ PATH = {
     "cancelAllAfter": "/openApi/swap/v2/trade/cancelAllAfter",
     "closePosition": "/openApi/swap/v1/trade/closePosition",
     "fullOrder": "/openApi/swap/v1/trade/fullOrder",
+    "maintMarginRatio": "/openApi/swap/v1/maintMarginRatio",
 }
 
 
@@ -540,6 +541,12 @@ class TradesEndpoints:
             "startTime": startTime,
             "symbol": symbol,
         }
+        return self.send_request()
+    
+    def position_maintenance_margin_ratio(self, symbol=SYMBOL):
+        self.path = PATH["maintMarginRatio"]
+        self.method = "GET"
+        self.params_map = {"symbol": symbol}
         return self.send_request()
     
     def long(self, price, quantity, type="LIMIT", symbol=SYMBOL):
