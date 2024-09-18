@@ -63,6 +63,7 @@ PATH = {
     "batchCancelReplace": "/openApi/swap/v1/trade/batchCancelReplace",
     "cancelAllAfter": "/openApi/swap/v2/trade/cancelAllAfter",
     "closePosition": "/openApi/swap/v1/trade/closePosition",
+    "fullOrder": "/openApi/swap/v1/trade/fullOrder",
 }
 
 
@@ -524,5 +525,22 @@ class TradesEndpoints:
         self.params_map = {"positionId": position_id}
         return self.send_request()
 
+    def all_orders(
+        self,
+        endTime=getTimestamp(24 * 60),
+        limit="500",
+        startTime=getTimestamp(),
+        symbol=SYMBOL,
+    ):
+        self.path = PATH["fullOrder"]
+        self.method = "GET"
+        self.params_map = {
+            "endTime": endTime,
+            "limit": limit,
+            "startTime": startTime,
+            "symbol": symbol,
+        }
+        return self.send_request()
+    
     def long(self, price, quantity, type="LIMIT", symbol=SYMBOL):
         return self.place_order("BUY", quantity, price, False, type, "LONG", symbol)
