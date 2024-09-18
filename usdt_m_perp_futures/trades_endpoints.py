@@ -62,6 +62,7 @@ PATH = {
     "dual": "/openApi/swap/v1/positionSide/dual",
     "cancelReplace": "/openApi/swap/v1/trade/cancelReplace",
     "batchCancelReplace": "/openApi/swap/v1/trade/batchCancelReplace",
+    "cancelAllAfter": "/openApi/swap/v2/trade/cancelAllAfter",
 }
 
 
@@ -508,6 +509,15 @@ class TradesEndpoints:
     def cancel_orders_place_orders_in_batches(self, batchOrders=[]):
         return self.place_multiple_orders(batchOrders, "batchCancelReplace")
 
+    def cancel_all_after(self, type="ACTIVATE", timeOut=10):
+        self.path = PATH["cancelAllAfter"]
+        self.method = "POST"
+        self.params_map = {
+            "type": type,
+            "timeOut": timeOut
+            }
+        return self.send_request()
+    
     def close(self, position_id):
         self.path = PATH["close"]
         self.method = "POST"
