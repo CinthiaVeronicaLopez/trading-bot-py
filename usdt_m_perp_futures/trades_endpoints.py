@@ -45,7 +45,6 @@ PATH = {
     "cancel": "/openApi/swap/v2/trade/order",
     "cancelMultipleOrders": "/openApi/swap/v2/trade/batchOrders",
     "cancelAllOpenOrders": "/openApi/swap/v2/trade/allOpenOrders",
-    "close": "/openApi/swap/v1/trade/closePosition",
     "close-all": "/openApi/swap/v2/trade/closeAllPositions",
     "current": "/openApi/swap/v2/trade/openOrders",
     "pending": "/openApi/swap/v2/trade/openOrder",
@@ -63,6 +62,7 @@ PATH = {
     "cancelReplace": "/openApi/swap/v1/trade/cancelReplace",
     "batchCancelReplace": "/openApi/swap/v1/trade/batchCancelReplace",
     "cancelAllAfter": "/openApi/swap/v2/trade/cancelAllAfter",
+    "closePosition": "/openApi/swap/v1/trade/closePosition",
 }
 
 
@@ -518,8 +518,8 @@ class TradesEndpoints:
             }
         return self.send_request()
     
-    def close(self, position_id):
-        self.path = PATH["close"]
+    def close_position_by_position_id(self, position_id):
+        self.path = PATH["closePosition"]
         self.method = "POST"
         self.params_map = {"positionId": position_id}
         return self.send_request()
