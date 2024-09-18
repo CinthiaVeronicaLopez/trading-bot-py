@@ -61,6 +61,7 @@ PATH = {
     "setDual": "/openApi/swap/v1/positionSide/dual",
     "dual": "/openApi/swap/v1/positionSide/dual",
     "cancelReplace": "/openApi/swap/v1/trade/cancelReplace",
+    "batchCancelReplace": "/openApi/swap/v1/trade/batchCancelReplace",
 }
 
 
@@ -283,6 +284,10 @@ class TradesEndpoints:
         type="MARKET",
         positionSide="LONG",
         symbol=SYMBOL,
+        cancelReplaceMode=False,
+        cancelClientOrderId=False,
+        cancelOrderId=False,
+        cancelRestrictions=False,
     ):
         params_map = {
             "symbol": symbol,
@@ -296,6 +301,15 @@ class TradesEndpoints:
             params_map["price"] = str(price)
         if take_profit:
             params_map["takeProfit"] = take_profit
+        if cancelReplaceMode:
+            params_map["cancelReplaceMode"] = cancelReplaceMode
+        if cancelClientOrderId:
+            params_map["cancelClientOrderId"] = cancelClientOrderId
+        if cancelOrderId:
+            params_map["cancelOrderId"] = cancelOrderId
+        if cancelRestrictions:
+            params_map["cancelRestrictions"] = cancelRestrictions
+        self.params_map = params_map
         return params_map
 
     def place_order(
@@ -343,8 +357,7 @@ class TradesEndpoints:
         self.path = PATH[path]
         self.method = "POST"
         if len(batchOrders) > 0:
-            self.params_map = {"batchOrders": batchOrders}
-            print("self.params_map", self.params_map)
+            self.params_map = {"batchOrders": json.dumps(batchOrders)}
             return self.send_request()
 
     def close_all_positions(self, symbol=SYMBOL):
@@ -484,42 +497,17 @@ class TradesEndpoints:
         self.method = "GET"
         self.params_map = {}
         return self.send_request()
-    
-    def cancel_existing_order_send_new_order(
-        self,
-        cancelReplaceMode="STOP_ON_FAILURE",
-        cancelClientOrderId="abc123test",
-        cancelOrderId=123456789,
-        cancelRestrictions="ONLY_NEWS",
-        side="BUY",
-        quantity=5,
-        price=False,
-        take_profit=False,
-        type="MARKET",
-        positionSide="LONG",
-        symbol=SYMBOL,
-    ):
+
+    def cancel_existing_order_send_new_order(self, batchOrders=[]):
         self.path = PATH["cancelReplace"]
         self.method = "POST"
-        params_map = {
-            "cancelReplaceMode": cancelReplaceMode,
-            "cancelClientOrderId": cancelClientOrderId,
-            "cancelOrderId": cancelOrderId,
-            "cancelRestrictions": cancelRestrictions,
-            "symbol": symbol,
-            "side": side,
-            "positionSide": positionSide,
-            "type": type,
-            "quantity": quantity,
-            "clientOrderID": str(uuid.uuid4()),
-        }
-        if not bool(take_profit) and bool(price):
-            params_map["price"] = str(price)
-        if take_profit:
-            params_map["takeProfit"] = take_profit
-        self.params_map = params_map
-        return self.send_request()
-    
+        if len(batchOrders) > 0:
+            self.params_map = {"batchOrders": json.dumps(batchOrders)}
+            return self.send_request()
+
+    def cancel_orders_place_orders_in_batches(self, batchOrders=[]):
+        return self.place_multiple_orders(batchOrders, "batchCancelReplace")
+
     def close(self, position_id):
         self.path = PATH["close"]
         self.method = "POST"
