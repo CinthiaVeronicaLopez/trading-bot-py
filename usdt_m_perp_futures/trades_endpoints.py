@@ -65,6 +65,7 @@ PATH = {
     "closePosition": "/openApi/swap/v1/trade/closePosition",
     "fullOrder": "/openApi/swap/v1/trade/fullOrder",
     "maintMarginRatio": "/openApi/swap/v1/maintMarginRatio",
+    "fillHistory": "/openApi/swap/v1/trade/fillHistory",
 }
 
 
@@ -548,6 +549,25 @@ class TradesEndpoints:
         self.method = "GET"
         self.params_map = {"symbol": symbol}
         return self.send_request()
-    
+
+    def query_historical_transaction_details(
+        self,
+        endTs=getTimestamp(24 * 60),
+        startTs=getTimestamp(),
+        lastFillId=130753,
+        pageSize=50,
+        symbol=SYMBOL,
+    ):
+        self.path = PATH["fillHistory"]
+        self.method = "GET"
+        self.params_map = {
+            "endTs": endTs,
+            "startTs": startTs,
+            "symbol": symbol,
+            "lastFillId": lastFillId,
+            "pageSize": pageSize,
+        }
+        return self.send_request()
+        
     def long(self, price, quantity, type="LIMIT", symbol=SYMBOL):
         return self.place_order("BUY", quantity, price, False, type, "LONG", symbol)
