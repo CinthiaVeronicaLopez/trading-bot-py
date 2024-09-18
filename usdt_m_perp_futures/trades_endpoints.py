@@ -66,6 +66,7 @@ PATH = {
     "fullOrder": "/openApi/swap/v1/trade/fullOrder",
     "maintMarginRatio": "/openApi/swap/v1/maintMarginRatio",
     "fillHistory": "/openApi/swap/v1/trade/fillHistory",
+    "positionHistory": "/openApi/swap/v1/trade/positionHistory",
 }
 
 
@@ -568,6 +569,23 @@ class TradesEndpoints:
             "pageSize": pageSize,
         }
         return self.send_request()
-        
+
+    def query_position_history(
+        self,
+        pageId=0,
+        startTime=getTimestamp(),
+        pageSize=20,
+        symbol=SYMBOL,
+    ):
+        self.path = PATH["positionHistory"]
+        self.method = "GET"
+        self.params_map = {
+            "symbol": symbol,
+            "pageId": pageId,
+            "pageSize": pageSize,
+            "startTime": startTime,
+        }
+        return self.send_request()
+     
     def long(self, price, quantity, type="LIMIT", symbol=SYMBOL):
         return self.place_order("BUY", quantity, price, False, type, "LONG", symbol)
