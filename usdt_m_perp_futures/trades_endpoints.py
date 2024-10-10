@@ -1,11 +1,14 @@
 # IMPORTS
 import os
-import time
 import requests
 import hmac
 import json
 import uuid
 from hashlib import sha256
+import ntplib
+import numpy as np
+import time
+import seaborn as sns # Libreria graficas
 
 # CONSTANTS
 from dotenv import load_dotenv
@@ -70,11 +73,28 @@ PATH = {
 }
 
 
+def get_ntp_time():
+    ntp = 0
+    while not ntp > 0:
+        try:
+            ntp_client = ntplib.NTPClient()
+            response = ntp_client.request("pool.ntp.org")  # Utiliza el servidor NTP
+            # El timestamp es en segundos, lo multiplicamos por 1000 para obtenerlo en milisegundos
+            ntp = int(response.tx_time * 1000)
+        except Exception as e:
+            print(f"Error al obtener el timestamp de NTP: {e}")
+            # Si hay un error, usamos el tiempo local como fallback            
+            ntp = 0
+            print("Esperando conexión...")
+            time.sleep(10)        
+            continue  
+    return ntp
+
+
 def getTimestamp(minutes=0):
     minutes = minutes * 60
     current = time.time()
     return int(current + minutes)
-
 
 class TradesEndpoints:
     """Manage API REST Trades Endpoints"""
@@ -104,33 +124,115 @@ class TradesEndpoints:
         sorted_keys = sorted(params_map)
         paramsStr = "&".join(["%s=%s" % (x, params_map[x]) for x in sorted_keys])
         if paramsStr != "":
-            return paramsStr + "&timestamp=" + str(int(time.time() * 1000))
+            return paramsStr + "&timestamp=" + str(get_ntp_time())#int(time.time() * 1000))
         else:
-            return paramsStr + "timestamp=" + str(int(time.time() * 1000))
+            return paramsStr + "timestamp=" + str(get_ntp_time())#int(time.time() * 1000))
 
     def send_request(self):
-        params_str = self.parseParam()
-        url = "%s%s?%s&signature=%s" % (
-            self.api_url,
-            self.path,
-            params_str,
-            self.get_sign(params_str),
-        )
-        # print(url)
         headers = {
             "X-BX-APIKEY": self.api_key,
         }
-        response = requests.request(
-            self.method, url, headers=headers, data=self.payload
-        )
-        print(response.text)
-        return response.json()
+        data = [{}]
+        code = 1
+        # while code != 0:
+        try:
+            params_str = self.parseParam()
+            url = "%s%s?%s&signature=%s" % (
+                self.api_url,
+                self.path,
+                params_str,
+                self.get_sign(params_str),
+            )
+            response = requests.request(
+                self.method, url, headers=headers, data=self.payload
+            )
+            response_json = response.json()
+                # Verificar si la respuesta contiene el campo 'code'
+            if "code" in response_json:
+                code = response_json["code"]
+            else:
+                raise ValueError(f"Campo 'code' no encontrado en la respuesta: {response.text}")
+
+            # Verificar si la respuesta contiene el campo 'data'
+            if "data" in response_json:
+                data = response_json["data"]
+            else:
+                raise ValueError(f"Campo 'data' no encontrado en la respuesta: {response.text}")
+
+            if code != 0:
+                raise ValueError(f"Error en la respuesta de la API: {response.text}")
+
+        except ValueError as e:
+            data = False
+            print("Error de conexión o en la respuesta de la API:")
+            print(self.path)
+            print(e)
+            time.sleep(10)
+            # continue
+        except Exception as e:
+            data = False
+            print("Otro tipo de error:")
+            print(e)
+            time.sleep(10)
+            # continue
+        return data
+
+    # TIPO DE PENDIENTE
+    def get_trend(self, slope, diff):
+        trend = "LATERAL"
+        if slope > 1 * diff:
+            trend = "LONG"
+        elif slope < -1 * diff:
+            trend = "SHORT"
+        return trend
+
+    # CALCULA MA
+    def _ma_(
+        self,
+        limits=[200, 5, 10, 20],
+        interval="1m",
+        type="close",
+        slope_max=7,
+        symbol=SYMBOL,
+    ):
+
+        def calc_trend(klines, limit=48, type="close"):
+            # Obtener los últimos valores
+            last_klines = klines[-1*limit:]
+            # Extraer los precios de cierre (close) y los timestamps
+            close_prices = np.array([float(item['close']) for item in last_klines])
+            timestamps = np.array([item['time'] for item in last_klines])
+            # Convertir los timestamps a segundos desde el primer valor
+            time_seconds = (timestamps - timestamps.min()) / 1000  # Convertir milisegundos a segundos
+            # Cálculo manual de la pendiente
+            # Aplicamos la fórmula de la regresión lineal: y = mx + b
+            A = np.vstack([time_seconds, np.ones(len(time_seconds))]).T
+            slope, intercept = np.linalg.lstsq(A, close_prices, rcond=None)[0]            
+            return slope
+
+        def calc_ma(klines, limit, type="close"):
+            sum = 0
+            for i in range(limit - 1, -1, -1):
+                sum = sum + float(klines[i][type])
+            return float(sum / limit)
+
+        limit_max = limits[0]
+        ma = {}
+
+        klines = self.kline_candlestick_data(limit_max, interval, symbol)        
+        if klines:
+            if len(klines) == limit_max:
+                for i in range(len(limits)):
+                    ma["ma" + str(i)] = calc_ma(klines, limits[i], type)
+                ma["slope"] = calc_trend(klines, slope_max, type)  # limit_max)
+
+        return ma
 
     # MARKET DATA
-    def symbols(self):
+    def symbols(self, symbol=SYMBOL):
         self.path = PATH["contracts"]
         self.method = "GET"
-        self.params_map = {}
+        self.params_map = {"symbol": symbol}
         return self.send_request()
 
     def order_book(self, limit=5, symbol=SYMBOL):
@@ -227,7 +329,11 @@ class TradesEndpoints:
     def query_position_data(self, symbol=SYMBOL):
         self.path = PATH["positions"]
         self.method = "GET"
-        self.params_map = {"symbol": symbol}
+        self.params_map = {
+            "recvWindow": "0",
+            "symbol": symbol,
+            # "timestamp": str(get_ntp_time()),
+        }
         return self.send_request()
 
     def get_account_profit_loss_fund_flow(self, limit=1000):
@@ -301,6 +407,7 @@ class TradesEndpoints:
             "type": type,
             "quantity": quantity,
             "clientOrderID": str(uuid.uuid4()),
+            "timestamp": str(get_ntp_time()),
         }
         if not bool(take_profit) and bool(price):
             params_map["price"] = str(price)
@@ -345,11 +452,12 @@ class TradesEndpoints:
         positionSide="LONG",
         symbol=SYMBOL,
     ):
-        response = self.symbol_price_ticker()
-        data = response["data"]
-        start_price = float(data["price"])  # * 1.001
-        stop_price = float(start_price) * 1.01
-        take_profit = self.serialize_to_json(start_price, stop_price)
+        if not price:
+            print("test price")
+            symbol_price = self.symbol_price_ticker()
+            start_price = float(symbol_price["price"])  # * 1.001
+            stop_price = float(start_price) * 1.01
+            take_profit = self.serialize_to_json(start_price, stop_price)
         return self.place_order(
             side, quantity, price, take_profit, type, positionSide, symbol, "test"
         )
@@ -516,12 +624,9 @@ class TradesEndpoints:
     def cancel_all_after(self, type="ACTIVATE", timeOut=10):
         self.path = PATH["cancelAllAfter"]
         self.method = "POST"
-        self.params_map = {
-            "type": type,
-            "timeOut": timeOut
-            }
+        self.params_map = {"type": type, "timeOut": timeOut}
         return self.send_request()
-    
+
     def close_position_by_position_id(self, position_id):
         self.path = PATH["closePosition"]
         self.method = "POST"
@@ -544,7 +649,7 @@ class TradesEndpoints:
             "symbol": symbol,
         }
         return self.send_request()
-    
+
     def position_maintenance_margin_ratio(self, symbol=SYMBOL):
         self.path = PATH["maintMarginRatio"]
         self.method = "GET"
@@ -586,6 +691,6 @@ class TradesEndpoints:
             "startTime": startTime,
         }
         return self.send_request()
-     
+
     def long(self, price, quantity, type="LIMIT", symbol=SYMBOL):
         return self.place_order("BUY", quantity, price, False, type, "LONG", symbol)
